@@ -19,6 +19,7 @@ public:
     Nivel1();
     ~Nivel1() override;
 
+    void cargarSprites();
     void inicializar() override;
     void actualizar(float dt) override;
     void renderizar(QPainter* painter) override;
@@ -29,6 +30,7 @@ public:
 
 private:
     void crearMapa();
+    QPixmap tilePiso, tilePared, tileCaja, tilePuertaCerrada, tilePuertaAbierta, tileVentana, tileLampara, tileSombra;
     void dibujarMapa(QPainter* painter);
 };
 

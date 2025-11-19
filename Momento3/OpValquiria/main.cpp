@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 
     Juego juego;
     juego.setWindowTitle("Operación Valquiria");
-    juego.resize(800, 600);
+    //juego.resize(800, 600);
     juego.show();
 
     return app.exec();
