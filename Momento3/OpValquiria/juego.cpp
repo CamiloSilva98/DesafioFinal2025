@@ -16,7 +16,7 @@ Juego::Juego(QWidget* parent)
     connect(timer, &QTimer::timeout, this, &Juego::actualizar);
 
     // Configurar la ventana
-    setFixedSize(800, 600);
+    setFixedSize(1550, 770);
     setFocusPolicy(Qt::StrongFocus);
 }
 
@@ -52,8 +52,12 @@ void Juego::cambiarNivel(int nivel)
     }
 
     // TODO: crear niveles según el número
-    switch(nivel) {
-         case 1: nivelActual = new Nivel1(); break;
+    switch(nivel)
+    {
+        case 1:
+        nivelActual = new Nivel1();
+        nivelActual->inicializar();
+        break;
     //     case 2: nivelActual = new Nivel2Ensamblaje(); break;
     //     case 3: nivelActual = new Nivel3Escape(); break;
     }
@@ -91,7 +95,7 @@ void Juego::actualizar()
     if (estadoJuego == Estado::JUGANDO && nivelActual != nullptr)
     {
         // Actualizar el nivel actual
-        // nivelActual->actualizar(0.016f); // delta time
+        nivelActual->actualizar(0.016f); // delta time
 
         // Verificar condiciones de victoria/derrota
         // if (nivelActual->verificarCondicionVictoria()) { ... }
@@ -147,14 +151,11 @@ void Juego::paintEvent(QPaintEvent* event)
     switch (estadoJuego)
     {
     case Estado::MENU:
-        qDebug() << "Dibujando MENU";
         dibujarMenu(painter);
         break;
     case Estado::JUGANDO:
-        qDebug() << "Dibujando JUGANDO";
         if (nivelActual != nullptr)
         {
-            qDebug() << "Llamando a nivel->renderizar()";
             nivelActual->renderizar(&painter);
         }
         dibujarHUD(painter);
@@ -175,7 +176,8 @@ void Juego::paintEvent(QPaintEvent* event)
     }
 }
 
-void Juego::dibujarMenu(QPainter& painter) {
+void Juego::dibujarMenu(QPainter& painter)
+{
     painter.setPen(Qt::white);
     painter.setFont(QFont("Arial", 32, QFont::Bold));
     painter.drawText(rect(), Qt::AlignCenter, "OPERACIÓN VALQUIRIA");
@@ -185,7 +187,8 @@ void Juego::dibujarMenu(QPainter& painter) {
                      "Presiona ESPACIO para comenzar");
 }
 
-void Juego::dibujarHUD(QPainter& painter) {
+void Juego::dibujarHUD(QPainter& painter)
+{
     painter.setPen(Qt::white);
     painter.setFont(QFont("Arial", 14));
 
@@ -196,7 +199,8 @@ void Juego::dibujarHUD(QPainter& painter) {
     painter.drawText(10, 50, QString("Vidas: %1").arg(vidas));
 }
 
-void Juego::dibujarPausa(QPainter& painter) {
+void Juego::dibujarPausa(QPainter& painter)
+{
     // Semi-transparencia
     painter.fillRect(rect(), QColor(0, 0, 0, 180));
 
@@ -205,14 +209,16 @@ void Juego::dibujarPausa(QPainter& painter) {
     painter.drawText(rect(), Qt::AlignCenter, "PAUSA\n\nESC para continuar");
 }
 
-void Juego::dibujarVictoria(QPainter& painter) {
+void Juego::dibujarVictoria(QPainter& painter)
+{
     painter.setPen(Qt::green);
     painter.setFont(QFont("Arial", 32, QFont::Bold));
     painter.drawText(rect(), Qt::AlignCenter,
                      QString("¡VICTORIA!\n\nPuntuación: %1").arg(puntuacion));
 }
 
-void Juego::dibujarDerrota(QPainter& painter) {
+void Juego::dibujarDerrota(QPainter& painter)
+{
     painter.setPen(Qt::red);
     painter.setFont(QFont("Arial", 32, QFont::Bold));
     painter.drawText(rect(), Qt::AlignCenter, "MISIÓN FALLIDA");

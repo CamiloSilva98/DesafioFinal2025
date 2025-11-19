@@ -2,21 +2,23 @@
 #include <QPainter>
 #include <QDebug>
 
-// Tipos de tiles para el mapa
-enum TipoTile {
-    VACIO = 0,      // Exterior/cielo
-    PISO = 1,       // Suelo del cuartel
-    PARED = 2,      // Paredes
-    CAJA = 3,       // Cajas para decoración
-    SOMBRA = 4,     // Zonas oscuras
-    PUERTA = 5,     // Puertas
-    VENTANA = 6,    // Ventanas
-    LAMPARA = 7     // Lámparas
+//revisar tu ruta de sprites
+const QString RUTA_SPRITES = "C:/Users/AsusTUF/Desktop/U/2025-2/Info II/DesafioFinal-JuegoWWII/DesafioFinal2025";
+
+enum TipoTile
+{
+    VACIO = 0,
+    PISO = 1,
+    PARED = 2,
+    CAJA = 3,
+    SOMBRA = 4,
+    PUERTA = 5,
+    VENTANA = 6,
+    LAMPARA = 7
 };
 
 Nivel1::Nivel1()
-    : Nivel(1),
-    camaraX(0)
+    : Nivel(1), camaraX(0)
 {
 }
 
@@ -27,14 +29,39 @@ Nivel1::~Nivel1()
 void Nivel1::inicializar()
 {
     qDebug() << "Inicializando Nivel 1...";
+
+    cargarSprites();
     crearMapa();
     qDebug() << "Mapa creado!";
     completado = false;
 }
+void Nivel1::cargarSprites()
+{
+    qDebug() << "=== CARGANDO SPRITES ===";
 
+    tilePiso = QPixmap(RUTA_SPRITES + "/Momento3/sprites/Piso.png");
+    qDebug() << "Piso:" << !tilePiso.isNull() << "Size:" << tilePiso.width() << "x" << tilePiso.height();
+
+    tilePared = QPixmap(RUTA_SPRITES + "/Momento3/sprites/wall.png");
+    qDebug() << "Pared:" << !tilePared.isNull();
+
+    tileCaja = QPixmap(RUTA_SPRITES + "/Momento3/sprites/Piso.png");
+    qDebug() << "Caja:" << !tileCaja.isNull();
+
+    tileVentana = QPixmap(RUTA_SPRITES + "/Momento3/sprites/Piso.png");
+    qDebug() << "Ventana:" << !tileVentana.isNull();
+
+    tileLampara = QPixmap(RUTA_SPRITES + "/Momento3/sprites/Piso.png");
+    qDebug() << "Lampara:" << !tileLampara.isNull();
+
+    tileSombra = QPixmap(RUTA_SPRITES + "/Momento3/sprites/Piso.png");
+    qDebug() << "Sombra:" << !tileSombra.isNull();
+
+    qDebug() << "=== FIN CARGA SPRITES ===";
+}
 void Nivel1::crearMapa()
 {
-    // Inicializar todo como VACIO (exterior)
+    // Inicializar todo como VACIO
     for (int y = 0; y < ALTO_MAPA; y++)
     {
         for (int x = 0; x < ANCHO_MAPA; x++)
@@ -48,7 +75,7 @@ void Nivel1::crearMapa()
     // ==========================================
 
     // Piso general del cuartel (filas 8-11 = suelo)
-    for (int y = 8; y < ALTO_MAPA; y++)
+    for (int y = 2; y < 6; y++)
     {
         for (int x = 0; x < ANCHO_MAPA; x++)
         {
@@ -57,33 +84,29 @@ void Nivel1::crearMapa()
     }
 
     // Techo/pared superior (fila 7)
-    for (int x = 0; x < ANCHO_MAPA; x++)
+    for (int x = 0; x <= ANCHO_MAPA; x++)
     {
-        mapa[7][x] = PARED;
+        mapa[1][x] = PARED;
     }
 
     // ==========================================
     // HABITACIÓN 1: ENTRADA (columnas 0-12)
     // ==========================================
-    for (int y = 8; y < 12; y++)
+    for (int y = 2; y < 6; y++)
     {
         mapa[y][0] = PARED;   // Pared izquierda
-        if (y != 9 && y != 10)
+        if (y != 3 && y != 4)
         {  // Dejar espacio para puerta
             mapa[y][12] = PARED;  // Pared derecha
         }
     }
 
     // Puerta de entrada
-    mapa[9][12] = PUERTA;
-    mapa[10][12] = PUERTA;
+    mapa[3][12] = PUERTA;
+    mapa[4][12] = PUERTA;
 
     // Decoración: caja en la esquina
-    mapa[10][2] = CAJA;
-
-    // Lámpara en el techo
-    mapa[7][6] = LAMPARA;
-
+    mapa[4][2] = CAJA;
 
     // ==========================================
     // PASILLO CENTRAL (columnas 12-28)
@@ -93,76 +116,78 @@ void Nivel1::crearMapa()
     // Zona de sombra en el pasillo
     for (int x = 18; x < 22; x++)
     {
-        mapa[10][x] = SOMBRA;
-        mapa[11][x] = SOMBRA;
+        mapa[4][x] = SOMBRA;
+        mapa[5][x] = SOMBRA;
     }
 
     // Cajas en el pasillo para ocultarse
-    mapa[9][15] = CAJA;
-    mapa[9][25] = CAJA;
+    mapa[3][15] = CAJA;
+    mapa[3][25] = CAJA;
 
     // Lámparas del pasillo
-    mapa[7][16] = LAMPARA;
-    mapa[7][24] = LAMPARA;
+    mapa[1][16] = LAMPARA;
+    mapa[1][24] = LAMPARA;
 
 
     // ==========================================
     // HABITACIÓN 2: OFICINAS (columnas 28-40)
     // ==========================================
-    for (int y = 8; y < 12; y++) {
-        if (y != 9 && y != 10) {
+    for (int y = 2; y < 6; y++)
+    {
+        if (y != 9 && y != 10)
+        {
             mapa[y][28] = PARED;  // Pared izquierda
         }
         mapa[y][40] = PARED;      // Pared derecha
     }
 
     // Puerta de entrada a oficinas
-    mapa[9][28] = PUERTA;
-    mapa[10][28] = PUERTA;
+    mapa[3][28] = PUERTA;
+    mapa[4][28] = PUERTA;
 
     // Ventanas en la pared superior
-    mapa[7][32] = VENTANA;
-    mapa[7][36] = VENTANA;
+    mapa[1][32] = VENTANA;
+    mapa[1][36] = VENTANA;
 
     // Mobiliario de oficina (cajas representan escritorios)
-    mapa[9][30] = CAJA;
-    mapa[9][34] = CAJA;
-    mapa[9][38] = CAJA;
+    mapa[3][30] = CAJA;
+    mapa[3][34] = CAJA;
+    mapa[3][38] = CAJA;
 
     // Zona de sombra bajo escritorio
     for (int x = 35; x < 38; x++) {
-        mapa[10][x] = SOMBRA;
+        mapa[4][x] = SOMBRA;
     }
 
     // Lámpara
-    mapa[7][34] = LAMPARA;
+    mapa[1][34] = LAMPARA;
 
 
     // ==========================================
     // HABITACIÓN 3: SALA DE REUNIONES - OBJETIVO (columnas 40-50)
     // ==========================================
-    for (int y = 8; y < 12; y++) {
-        if (y != 9 && y != 10) {
+    for (int y = 2; y < 6; y++) {
+        if (y != 3 && y != 4) {
             mapa[y][40] = PARED;  // Pared izquierda
         }
         mapa[y][49] = PARED;      // Pared derecha
     }
 
     // Puerta de entrada
-    mapa[9][40] = PUERTA;
-    mapa[10][40] = PUERTA;
+    mapa[3][40] = PUERTA;
+    mapa[4][40] = PUERTA;
 
     // Mesa de reuniones (representada con cajas)
     for (int x = 43; x < 47; x++) {
-        mapa[9][x] = CAJA;
+        mapa[3][x] = CAJA;
     }
 
     // Ventanas
-    mapa[7][44] = VENTANA;
-    mapa[7][46] = VENTANA;
+    mapa[1][44] = VENTANA;
+    mapa[1][46] = VENTANA;
 
     // Lámpara central
-    mapa[7][45] = LAMPARA;
+    mapa[1][45] = LAMPARA;
 }
 
 void Nivel1::actualizar(float dt)
@@ -173,7 +198,6 @@ void Nivel1::actualizar(float dt)
 
 void Nivel1::renderizar(QPainter* painter)
 {
-    qDebug() << "Renderizando nivel... CamaraX:" << camaraX;
     if (!painter) return;
 
     // Guardar estado del painter
@@ -210,43 +234,28 @@ void Nivel1::dibujarMapa(QPainter* painter)
             case VACIO:
                 // Cielo/exterior - azul oscuro nocturno
                 painter->fillRect(posX, posY, TAMANO_TILE, TAMANO_TILE,
-                                  QColor(15, 20, 35));
+                                 "black");
                 break;
 
             case PISO:
-                // Piso del cuartel - gris con textura
-                painter->fillRect(posX, posY, TAMANO_TILE, TAMANO_TILE,
-                                  QColor(55, 60, 70));
-
-                // Líneas de baldosas
-                painter->setPen(QColor(45, 50, 60));
-                painter->drawRect(posX, posY, TAMANO_TILE, TAMANO_TILE);
-
-                // Detalles de desgaste (pequeños rectángulos)
-                if ((x + y) % 7 == 0)
+                if (!tilePiso.isNull())
                 {
-                    painter->fillRect(posX + 10, posY + 10, 8, 8,
-                                      QColor(45, 50, 60));
+                    painter->drawPixmap(posX, posY, TAMANO_TILE, TAMANO_TILE, tilePiso);
+                }
+                else
+                {
+                    painter->fillRect(posX, posY, TAMANO_TILE, TAMANO_TILE, Qt::red);
                 }
                 break;
 
             case PARED:
-                // Pared - gris claro con efecto de profundidad
-                painter->fillRect(posX, posY, TAMANO_TILE, TAMANO_TILE,
-                                  QColor(95, 100, 110));
-
-                // Borde superior más claro (luz)
-                painter->fillRect(posX, posY, TAMANO_TILE, 8,
-                                  QColor(115, 120, 130));
-
-                // Borde inferior más oscuro (sombra)
-                painter->fillRect(posX, posY + TAMANO_TILE - 10,
-                                  TAMANO_TILE, 10, QColor(65, 70, 80));
-
-                // Líneas verticales (tablones)
-                painter->setPen(QColor(85, 90, 100));
-                for (int i = 0; i < TAMANO_TILE; i += 16) {
-                    painter->drawLine(posX + i, posY, posX + i, posY + TAMANO_TILE);
+                if (!tilePared.isNull())
+                {
+                    painter->drawPixmap(posX, posY, TAMANO_TILE, TAMANO_TILE, tilePared);
+                }
+                else
+                {
+                    painter->fillRect(posX, posY, TAMANO_TILE, TAMANO_TILE, QColor(95, 100, 110));
                 }
                 break;
 
