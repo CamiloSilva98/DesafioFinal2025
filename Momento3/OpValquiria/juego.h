@@ -42,10 +42,11 @@ public:
     void pausar();
     void terminar();
 
+
 protected:
     void keyPressEvent(QKeyEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
-
+    void keyReleaseEvent(QKeyEvent* event)override;
 private slots:
     void actualizar();
 };

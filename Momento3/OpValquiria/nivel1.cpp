@@ -1,9 +1,7 @@
 #include "nivel1.h"
 #include <QPainter>
 #include <QDebug>
-
-//revisar tu ruta de sprites
-const QString RUTA_SPRITES = "C:/Users/AsusTUF/Desktop/U/2025-2/Info II/DesafioFinal-JuegoWWII/DesafioFinal2025";
+#include "jugador.h"
 
 enum TipoTile
 {
@@ -18,12 +16,16 @@ enum TipoTile
 };
 
 Nivel1::Nivel1()
-    : Nivel(1), camaraX(0)
+    : Nivel(1), camaraX(0), jugador(nullptr)
 {
 }
 
 Nivel1::~Nivel1()
 {
+    if (jugador)
+    {
+        delete jugador;
+    }
 }
 
 void Nivel1::inicializar()
@@ -32,6 +34,8 @@ void Nivel1::inicializar()
 
     cargarSprites();
     crearMapa();
+    jugador = new Jugador(200, 400);  // x=200, y=400
+    qDebug() << "Jugador creado!";
     qDebug() << "Mapa creado!";
     completado = false;
 }
@@ -39,22 +43,22 @@ void Nivel1::cargarSprites()
 {
     qDebug() << "=== CARGANDO SPRITES ===";
 
-    tilePiso = QPixmap(RUTA_SPRITES + "/Momento3/sprites/Piso.png");
+    tilePiso = QPixmap(":/sprites/sprites/Piso.png");
     qDebug() << "Piso:" << !tilePiso.isNull() << "Size:" << tilePiso.width() << "x" << tilePiso.height();
 
-    tilePared = QPixmap(RUTA_SPRITES + "/Momento3/sprites/wall.png");
+    tilePared = QPixmap(":/sprites/sprites/wall.png");
     qDebug() << "Pared:" << !tilePared.isNull();
 
-    tileCaja = QPixmap(RUTA_SPRITES + "/Momento3/sprites/Piso.png");
+    tileCaja = QPixmap(":/sprites/sprites/Piso.png");
     qDebug() << "Caja:" << !tileCaja.isNull();
 
-    tileVentana = QPixmap(RUTA_SPRITES + "/Momento3/sprites/Piso.png");
+    tileVentana = QPixmap(":/sprites/sprites/Piso.png");
     qDebug() << "Ventana:" << !tileVentana.isNull();
 
-    tileLampara = QPixmap(RUTA_SPRITES + "/Momento3/sprites/Piso.png");
+    tileLampara = QPixmap(":/sprites/sprites/Piso.png");
     qDebug() << "Lampara:" << !tileLampara.isNull();
 
-    tileSombra = QPixmap(RUTA_SPRITES + "/Momento3/sprites/Piso.png");
+    tileSombra = QPixmap(":/sprites/sprites/Piso.png");
     qDebug() << "Sombra:" << !tileSombra.isNull();
 
     qDebug() << "=== FIN CARGA SPRITES ===";
@@ -192,10 +196,29 @@ void Nivel1::crearMapa()
 
 void Nivel1::actualizar(float dt)
 {
-    // Por ahora solo dejamos que pase el tiempo
-    // La cámara se moverá manualmente con las flechas
+    if (jugador)
+    {
+        jugador->actualizar(dt);
+    }
+    actualizarCamara();
 }
+void Nivel1::actualizarCamara()
+{
+    if (!jugador) return;
 
+    const float ANCHO_PANTALLA = 1550;
+    const float ANCHO_NIVEL = ANCHO_MAPA * TAMANO_TILE;
+
+    // Centrar cámara en el jugador
+    camaraX = jugador->getX() - ANCHO_PANTALLA / 2;
+
+    // Limitar la cámara
+    if (camaraX < 0) camaraX = 0;
+    if (camaraX > ANCHO_NIVEL - ANCHO_PANTALLA)
+    {
+        camaraX = ANCHO_NIVEL - ANCHO_PANTALLA;
+    }
+}
 void Nivel1::renderizar(QPainter* painter)
 {
     if (!painter) return;
@@ -209,6 +232,11 @@ void Nivel1::renderizar(QPainter* painter)
     // Dibujar el mapa
     dibujarMapa(painter);
 
+    if (jugador)
+    {
+        jugador->renderizar(painter);
+    }
+
     // Restaurar painter
     painter->restore();
 
@@ -218,8 +246,28 @@ void Nivel1::renderizar(QPainter* painter)
     painter->drawText(10, 20, "Nivel 1: La Guarida del Lobo");
     painter->drawText(10, 40, "Use ← → para mover la cámara");
     painter->drawText(10, 60, QString("Posición cámara: %1").arg(camaraX));
-}
 
+    if (jugador)
+    {
+        painter->drawText(10, 90, QString("Jugador: X=%1 Y=%2")
+                              .arg((int)jugador->getX())
+                              .arg((int)jugador->getY()));
+    }
+}
+void Nivel1::manejarTecla(QKeyEvent* event, bool pressed)
+{
+    if (jugador)
+    {
+        if (pressed)
+        {
+            jugador->manejarTeclaPresionada(event->key());
+        }
+        else
+        {
+            jugador->manejarTeclaSoltada(event->key());
+        }
+    }
+}
 void Nivel1::dibujarMapa(QPainter* painter)
 {
     for (int y = 0; y < ALTO_MAPA; y++)

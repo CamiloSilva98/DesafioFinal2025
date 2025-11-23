@@ -117,27 +117,27 @@ void Juego::keyPressEvent(QKeyEvent* event)
             iniciar();
         }
         break;
-    case Qt::Key_Left:
-        if (nivelActual && estadoJuego == Estado::JUGANDO)
-        {
-            Nivel1* nivel1 = dynamic_cast<Nivel1*>(nivelActual);
-            if (nivel1)
-            {
-                nivel1->moverCamara(-10);  // Mover cámara a la izquierda
-            }
-        }
-        break;
-    case Qt::Key_Right:
+    default:
+        // ⭐ PASAR TODAS LAS TECLAS AL NIVEL
         if (nivelActual && estadoJuego == Estado::JUGANDO)
         {
             Nivel1* nivel1 = dynamic_cast<Nivel1*>(nivelActual);
             if (nivel1) {
-                nivel1->moverCamara(10);  // Mover cámara a la derecha
+                nivel1->manejarTecla(event, true);  // true = presionada
             }
         }
         break;
-    default:
-        break;
+    }
+}
+
+void Juego::keyReleaseEvent(QKeyEvent* event)
+{
+    if (nivelActual && estadoJuego == Estado::JUGANDO)
+    {
+        Nivel1* nivel1 = dynamic_cast<Nivel1*>(nivelActual);
+        if (nivel1) {
+            nivel1->manejarTecla(event, false);  // false = soltada
+        }
     }
 }
 
