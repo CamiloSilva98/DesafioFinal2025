@@ -11,6 +11,7 @@ CONFIG += c++17
 SOURCES += \
     entidad.cpp \
     juego.cpp \
+    jugador.cpp \
     main.cpp \
     mainwindow.cpp \
     nivel.cpp \
@@ -19,6 +20,7 @@ SOURCES += \
 HEADERS += \
     entidad.h \
     juego.h \
+    jugador.h \
     mainwindow.h \
     nivel.h \
     nivel1.h
@@ -32,4 +34,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
+    resources.qrc \
     sprites.qrc

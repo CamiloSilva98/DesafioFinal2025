@@ -4,6 +4,7 @@
 #include "nivel.h"
 #include <QPainter>
 
+class Jugador;
     class Nivel1 : public Nivel {
 private:
     // Mapa del nivel (tiles)
@@ -27,11 +28,15 @@ public:
     bool verificarCondicionDerrota() override;
 
     void moverCamara(float dx);  // Para probar el scroll
+    void manejarTecla(QKeyEvent* event, bool pressed);
 
 private:
     void crearMapa();
-    QPixmap tilePiso, tilePared, tileCaja, tilePuertaCerrada, tilePuertaAbierta, tileVentana, tileLampara, tileSombra;
+    QPixmap tilePiso, tilePared, tileCaja, tilePuertaCerrada, tilePuertaAbierta, tileVentana,
+        tileLampara, tileSombra;
+    Jugador* jugador;
     void dibujarMapa(QPainter* painter);
+    void actualizarCamara();
 };
 
 #endif

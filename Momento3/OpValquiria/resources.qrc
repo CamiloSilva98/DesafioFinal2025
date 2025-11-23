@@ -1,0 +1,34 @@
+<RCC>
+    <qresource prefix="/sprites">
+        <file>sprites/Piso.png</file>
+        <file>sprites/wall.png</file>
+        <file>sprites/GeneralagachadoD1.PNG</file>
+        <file>sprites/GeneralagachadoD2.PNG</file>
+        <file>sprites/GeneralagachadoL1.PNG</file>
+        <file>sprites/GeneralagachadoL2.PNG</file>
+        <file>sprites/GeneralagachadoR1.PNG</file>
+        <file>sprites/GeneralagachadoR2.PNG</file>
+        <file>sprites/GeneralagachadoU1.PNG</file>
+        <file>sprites/GeneralagachadoU2.PNG</file>
+        <file>sprites/GeneralD1.PNG</file>
+        <file>sprites/GeneralD2.PNG</file>
+        <file>sprites/GeneralD3.PNG</file>
+        <file>sprites/GeneralD4.PNG</file>
+        <file>sprites/GeneralL1.PNG</file>
+        <file>sprites/GeneralL2.PNG</file>
+        <file>sprites/GeneralL3.PNG</file>
+        <file>sprites/GeneralL4.PNG</file>
+        <file>sprites/GeneralMuerteD.PNG</file>
+        <file>sprites/GeneralMuerteL.PNG</file>
+        <file>sprites/GeneralMuerteR.PNG</file>
+        <file>sprites/GeneralMuerteU.PNG</file>
+        <file>sprites/GeneralR1.PNG</file>
+        <file>sprites/GeneralR2.PNG</file>
+        <file>sprites/GeneralR3.PNG</file>
+        <file>sprites/GeneralR4.PNG</file>
+        <file>sprites/GeneralU1.PNG</file>
+        <file>sprites/GeneralU2.PNG</file>
+        <file>sprites/GeneralU3.PNG</file>
+        <file>sprites/GeneralU4.PNG</file>
+    </qresource>
+</RCC>
