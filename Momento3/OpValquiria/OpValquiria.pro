@@ -1,4 +1,5 @@
-QT       += core gui
+QT       += core gui\
+            widgets multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -9,7 +10,9 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    agenteinteligente.cpp \
     entidad.cpp \
+    guardia.cpp \
     juego.cpp \
     jugador.cpp \
     main.cpp \
@@ -18,7 +21,9 @@ SOURCES += \
     nivel1.cpp
 
 HEADERS += \
+    agenteinteligente.h \
     entidad.h \
+    guardia.h \
     juego.h \
     jugador.h \
     mainwindow.h \
