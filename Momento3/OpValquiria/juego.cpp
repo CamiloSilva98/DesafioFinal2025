@@ -190,13 +190,13 @@ void Juego::dibujarMenu(QPainter& painter)
 void Juego::dibujarHUD(QPainter& painter)
 {
     painter.setPen(Qt::white);
-    painter.setFont(QFont("Arial", 14));
+    painter.setFont(QFont("Arial", 11));
 
     // Puntuación
-    painter.drawText(10, 30, QString("Puntuación: %1").arg(puntuacion));
+    painter.drawText(10, 32, QString("Puntuación: %1").arg(puntuacion));
 
     // Vidas
-    painter.drawText(10, 50, QString("Vidas: %1").arg(vidas));
+    painter.drawText(10, 60, QString("Vidas: %1").arg(vidas));
 }
 
 void Juego::dibujarPausa(QPainter& painter)

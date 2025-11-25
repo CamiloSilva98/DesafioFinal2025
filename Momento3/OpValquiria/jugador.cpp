@@ -120,7 +120,8 @@ void Jugador::cargarSprites()
 int Jugador::getNumFrames(Direccion dir) const
 {
     int dirIndex = static_cast<int>(dir);
-    if (dirIndex >= 0 && dirIndex < sprites.size()) {
+    if (dirIndex >= 0 && dirIndex < sprites.size())
+    {
         return sprites[dirIndex].size();
     }
     return 0;
@@ -136,14 +137,16 @@ void Jugador::actualizar(float dt)
     // Determinar velocidad según estado
     float velocidadActual = VEL_NORMAL;
 
-    if (teclaC && !corriendo) {
+    if (teclaC && !corriendo)
+    {
         agachado = true;
         velocidadActual = VEL_AGACHADO;
     } else {
         agachado = false;
     }
 
-    if (teclaShift && !agachado) {
+    if (teclaShift && !agachado)
+    {
         corriendo = true;
         velocidadActual = VEL_CORRIENDO;
     } else {
@@ -175,6 +178,30 @@ void Jugador::actualizar(float dt)
         direccionActual = Direccion::DOWN;
         moviendose = true;
     }
+    if (teclaIzquierda && agachado)
+    {
+        velocidadX = -velocidadActual;
+        direccionActual = Direccion::ALEFT;
+        moviendose = true;
+    }
+    else if (teclaDerecha && agachado)
+    {
+        velocidadX = velocidadActual;
+        direccionActual = Direccion::ARIGTH;
+        moviendose = true;
+    }
+    else if (teclaArriba && agachado)
+    {
+        velocidadY = -velocidadActual;
+        direccionActual = Direccion::AUP;
+        moviendose = true;
+    }
+    else if (teclaAbajo && agachado)
+    {
+        velocidadY = velocidadActual;
+        direccionActual = Direccion::ADOWN;
+        moviendose = true;
+    }
     // Aplicar movimiento
     x += velocidadX * dt;
     y += velocidadY * dt;
@@ -182,6 +209,7 @@ void Jugador::actualizar(float dt)
     // Limitar a los bordes del nivel
     // Ancho del nivel: 50 tiles * 64 = 3200 píxeles
     // Alto del nivel: 12 tiles * 64 = 768 píxeles
+
     if (x < 0) x = 0;
     if (x > 3200 - ancho) x = 3200 - ancho;
     if (y < 0) y = 0;
@@ -195,18 +223,16 @@ void Jugador::actualizar(float dt)
         float velocidadAnimacion = 0.15f;
         if (corriendo)
         {
-            velocidadAnimacion = 0.08f;
+            velocidadAnimacion = 0.06f;
         }
         else if (agachado)
         {
-            velocidadAnimacion = 0.25f;
+            velocidadAnimacion = 0.3f;
         }
 
         if (tiempoAnimacion > velocidadAnimacion)
         {
             tiempoAnimacion = 0;
-
-            // ⭐ Obtener número de frames de la dirección actual
             int numFrames = getNumFrames(direccionActual);
             if (numFrames > 0)
             {
@@ -227,14 +253,15 @@ void Jugador::renderizar(QPainter* painter)
 
     QPixmap spriteActual;
 
-    // ⭐⭐⭐ SELECCIONAR SPRITE DESDE EL ARRAY ⭐⭐⭐
 
     // Obtener índice de dirección
     int dirIndex = static_cast<int>(direccionActual);
 
     // Verificar que la dirección y frame sean válidos
-    if (dirIndex >= 0 && dirIndex < sprites.size()) {
-        if (frameActual >= 0 && frameActual < sprites[dirIndex].size()) {
+    if (dirIndex >= 0 && dirIndex < sprites.size())
+    {
+        if (frameActual >= 0 && frameActual < sprites[dirIndex].size())
+        {
             spriteActual = sprites[dirIndex][frameActual];
         }
     }
@@ -242,22 +269,22 @@ void Jugador::renderizar(QPainter* painter)
     if (!spriteActual.isNull())
     {
         painter->drawPixmap(x, y, ancho, alto, spriteActual);
-
-        // Debug: Mostrar info (opcional, puedes comentar después)
-        painter->setPen(Qt::yellow);
-        painter->setFont(QFont("Arial", 8));
-        painter->drawText(x, y - 5, QString("F:%1 D:%2")
-                                        .arg(frameActual)
-                                        .arg(static_cast<int>(direccionActual)));
-    } else {
+    }
+    else
+    {
         // Fallback: Rectángulo de colores (si no hay sprite)
         QColor colorJugador;
 
-        if (agachado) {
+        if (agachado)
+        {
             colorJugador = QColor(100, 150, 100);
-        } else if (corriendo) {
+        }
+        else if (corriendo)
+        {
             colorJugador = QColor(150, 200, 150);
-        } else {
+        }
+        else
+        {
             colorJugador = QColor(120, 180, 120);
         }
 

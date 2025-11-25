@@ -37,6 +37,11 @@ public:
     float getX() const { return x; }
     float getY() const { return y; }
     void setVelocidad(float vx, float vy);
+
+    float getAncho() const { return ancho; }
+    float getAlto() const { return alto; }
+    void setX(float newX) { x = newX; }
+    void setY(float newY) { y = newY; }
 };
 
 #endif

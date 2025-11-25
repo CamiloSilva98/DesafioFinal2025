@@ -3,18 +3,39 @@
 
 #include "nivel.h"
 #include <QPainter>
+#include <QVector>
+
 
 class Jugador;
-    class Nivel1 : public Nivel {
+class Guardia;
+
+class Nivel1 : public Nivel {
 private:
     // Mapa del nivel (tiles)
-    static const int ANCHO_MAPA = 50;  // 50 tiles de ancho
-    static const int ALTO_MAPA = 12;   // 12 tiles de alto
+    static const int ANCHO_MAPA = 50;
+    static const int ALTO_MAPA = 12;
     static const int TAMANO_TILE = 64;
     int mapa[ALTO_MAPA][ANCHO_MAPA];
 
     // Cámara (para hacer scroll horizontal)
     float camaraX;
+
+    void crearMapa();
+    QPixmap tilePiso, tilePared, tileColumna, tilePuertaCerrada, tilePuertaAbierta, tileVentana,
+        tileLampara, tileSombra;
+
+    Jugador* jugador;
+    QVector<Guardia*> guardias;
+
+    int detecciones;
+    int MAX_DETECCIONES = 3;
+
+    void dibujarMapa(QPainter* painter);
+    void actualizarCamara();
+
+    void crearGuardias();
+    void verificarDetecciones();
+
 
 public:
     Nivel1();
@@ -30,13 +51,10 @@ public:
     void moverCamara(float dx);  // Para probar el scroll
     void manejarTecla(QKeyEvent* event, bool pressed);
 
-private:
-    void crearMapa();
-    QPixmap tilePiso, tilePared, tileCaja, tilePuertaCerrada, tilePuertaAbierta, tileVentana,
-        tileLampara, tileSombra;
-    Jugador* jugador;
-    void dibujarMapa(QPainter* painter);
-    void actualizarCamara();
+    bool hayColision(float x, float y, float ancho, float alto) const;
+    int getTileEnPosicion(float x, float y) const;
+    bool estaEnSombra(float x, float y) const;
+
 };
 
 #endif

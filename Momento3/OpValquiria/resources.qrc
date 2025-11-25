@@ -30,5 +30,20 @@
         <file>sprites/GeneralU2.PNG</file>
         <file>sprites/GeneralU3.PNG</file>
         <file>sprites/GeneralU4.PNG</file>
+        <file>sprites/Columna.png</file>
+        <file>sprites/GuardiaD1.png</file>
+        <file>sprites/GuardiaD2.png</file>
+        <file>sprites/GuardiaD3.png</file>
+        <file>sprites/GuardiaL1.png</file>
+        <file>sprites/GuardiaL2.png</file>
+        <file>sprites/GuardiaR1.png</file>
+        <file>sprites/GuardiaR2.png</file>
+        <file>sprites/GuardiaU1.png</file>
+        <file>sprites/GuardiaU2.png</file>
+        <file>sprites/GuardiaU3.png</file>
+    </qresource>
+    <qresource prefix="/sound">
+        <file>sounds/alarm-1-with-reverberation-30031.mp3</file>
+        <file>sounds/freeze-2-86991.mp3</file>
     </qresource>
 </RCC>
