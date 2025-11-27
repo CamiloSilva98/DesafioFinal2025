@@ -18,7 +18,8 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     nivel.cpp \
-    nivel1.cpp
+    nivel1.cpp \
+    pieza.cpp
 
 HEADERS += \
     agenteinteligente.h \
@@ -28,7 +29,8 @@ HEADERS += \
     jugador.h \
     mainwindow.h \
     nivel.h \
-    nivel1.h
+    nivel1.h \
+    pieza.h
 
 FORMS += \
     mainwindow.ui
