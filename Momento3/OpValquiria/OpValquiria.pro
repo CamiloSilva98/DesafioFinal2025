@@ -17,6 +17,7 @@ SOURCES += \
     jugador.cpp \
     main.cpp \
     mainwindow.cpp \
+    maletin.cpp \
     nivel.cpp \
     nivel1.cpp \
     pieza.cpp
@@ -28,6 +29,7 @@ HEADERS += \
     juego.h \
     jugador.h \
     mainwindow.h \
+    maletin.h \
     nivel.h \
     nivel1.h \
     pieza.h
