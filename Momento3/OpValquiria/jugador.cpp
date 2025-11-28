@@ -6,8 +6,9 @@ Jugador::Jugador(float x, float y)
     : Entidad(x, y, 32, 48),  // Tamaño: 32x48 píxeles
     agachado(false),
     corriendo(false),
-    oculto(false),
+    oculto(false), muerto(false),
     direccionActual(Direccion::DOWN),
+    direccionMuerte(Direccion::DOWN),
     teclaIzquierda(false),
     teclaDerecha(false),
     teclaArriba(false),
@@ -115,7 +116,37 @@ void Jugador::cargarSprites()
     spriteMuerteL = QPixmap(":/sprites/sprites/GeneralMuerteL.png");
     spriteMuerteR = QPixmap(":/sprites/sprites/GeneralMuerteR.png");
 
+
     qDebug() << "=== FIN CARGA SPRITES JUGADOR ===";
+}
+void Jugador::morir()
+{
+    if (muerto) return;  // Ya está muerto
+
+    muerto = true;
+    tiempoMuerte = 0.0f;
+    velocidadX = 0;
+    velocidadY = 0;
+
+    // Guardar la dirección actual para el sprite de muerte
+    if (direccionActual == Direccion::UP || direccionActual == Direccion::AUP)
+    {
+        direccionMuerte = Direccion::UP;
+    }
+    else if (direccionActual == Direccion::DOWN || direccionActual == Direccion::ADOWN)
+    {
+        direccionMuerte = Direccion::DOWN;
+    }
+    else if (direccionActual == Direccion::LEFT || direccionActual == Direccion::ALEFT)
+    {
+        direccionMuerte = Direccion::LEFT;
+    }
+    else
+    {
+        direccionMuerte = Direccion::RIGTH;
+    }
+
+    qDebug() << "¡JUGADOR MUERTO!";
 }
 int Jugador::getNumFrames(Direccion dir) const
 {
@@ -129,6 +160,12 @@ int Jugador::getNumFrames(Direccion dir) const
 void Jugador::actualizar(float dt)
 {
     if (!activo) return;
+
+    if (muerto)
+    {
+        tiempoMuerte += dt;
+        return;
+    }
 
     // Resetear velocidad
     velocidadX = 0;
@@ -251,6 +288,29 @@ void Jugador::renderizar(QPainter* painter)
 {
     if (!activo || !painter) return;
 
+    if (muerto)
+    {
+        QPixmap spriteMuerte;
+
+        switch (direccionMuerte)
+        {
+        case Direccion::UP:
+            spriteMuerte = spriteMuerteU;
+            break;
+        case Direccion::DOWN:
+            spriteMuerte = spriteMuerteD;
+            break;
+        case Direccion::LEFT:
+            spriteMuerte = spriteMuerteL;
+            break;
+        case Direccion::RIGTH:
+            spriteMuerte = spriteMuerteR;
+            break;
+        default:
+            spriteMuerte = spriteMuerteD;
+            break;
+        }
+    }
     QPixmap spriteActual;
 
 

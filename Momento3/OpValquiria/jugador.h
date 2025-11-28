@@ -26,7 +26,10 @@ private:
     bool agachado;
     bool corriendo;
     bool oculto;
+    bool muerto;
+    float tiempoMuerte;
     Direccion direccionActual;
+    Direccion direccionMuerte;
 
     // Velocidades
     static constexpr float VEL_NORMAL = 120.0f;
@@ -77,9 +80,10 @@ public:
     bool estaCorriendo() const { return corriendo; }
     bool estaOculto() const { return oculto; }
     bool estaVisible() const { return !oculto; }
+    bool estaMuerto() const { return muerto; }
 
     void setOculto(bool valor) { oculto = valor; }
-
+    void morir();
     void cargarSprites();
 
     int getNumFrames(Direccion dir) const;
