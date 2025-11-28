@@ -41,6 +41,20 @@
         <file>sprites/GuardiaU1.png</file>
         <file>sprites/GuardiaU2.png</file>
         <file>sprites/GuardiaU3.png</file>
+        <file>sprites/AH.png</file>
+        <file>sprites/cuadro.png</file>
+        <file>sprites/sombra.png</file>
+        <file>sprites/Marco.png</file>
+        <file>sprites/plano.png</file>
+        <file>sprites/caballete.png</file>
+        <file>sprites/cofre.png</file>
+        <file>sprites/librero.png</file>
+        <file>sprites/librero2.png</file>
+        <file>sprites/llave.png</file>
+        <file>sprites/mesaB.png</file>
+        <file>sprites/sofa.png</file>
+        <file>sprites/planta.png</file>
+        <file>sprites/table.png</file>
     </qresource>
     <qresource prefix="/sound">
         <file>sounds/alarm-1-with-reverberation-30031.mp3</file>

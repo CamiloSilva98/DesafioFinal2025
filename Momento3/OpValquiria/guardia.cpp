@@ -347,15 +347,6 @@ void Guardia::renderizar(QPainter* painter)
     painter->setPen(Qt::white);
     painter->setFont(QFont("Arial", 8));
 
-    QString estadoTexto;
-    switch (estadoActual) {
-    case EstadoAgente::PATRULLANDO: estadoTexto = "PATROL"; break;
-    case EstadoAgente::INVESTIGANDO: estadoTexto = "CHECK"; break;
-    case EstadoAgente::PERSIGUIENDO: estadoTexto = "CHASE!"; break;
-    case EstadoAgente::BUSCANDO: estadoTexto = "SEARCH"; break;
-    }
-
-    painter->drawText(x - 10, y - 5, estadoTexto);
 
     // Debug: mostrar frame actual
     painter->setPen(Qt::yellow);
@@ -458,7 +449,7 @@ bool Guardia::detectarRuido()
     if (!jugadorObjetivo) return false;
 
     // Solo detecta ruido si el jugador está corriendo
-    if (!jugadorObjetivo->estaCorriendo() ) {
+    if (jugadorObjetivo->estaAgachado() ) {
         return false;
     }
 
@@ -528,7 +519,7 @@ void Guardia::moverHaciaPunto(QPointF objetivo, float velocidad, float dt)
     {
         dx = dx / distancia;
         dy = dy / distancia;
-
+        actualizarDireccionVista(dx, dy);
         actualizarDireccionSprite(dx, dy);
 
         dx *= velocidad * dt;
@@ -536,5 +527,20 @@ void Guardia::moverHaciaPunto(QPointF objetivo, float velocidad, float dt)
 
         x += dx;
         y += dy;
+    }
+}
+void Guardia::actualizarDireccionVista(float dx, float dy)
+{
+    // Solo actualizar si hay movimiento significativo
+    if (std::abs(dx) > 0.1f || std::abs(dy) > 0.1f) {
+        // Calcular ángulo del movimiento en grados
+        float angulo = std::atan2(dy, dx) * 180.0f / M_PI;
+
+        // Normalizar a rango 0-360
+        if (angulo < 0) {
+            angulo += 360.0f;
+        }
+
+        direccionVista = angulo;
     }
 }

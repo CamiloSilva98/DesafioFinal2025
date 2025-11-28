@@ -8,6 +8,11 @@
 
 class Jugador;
 class Guardia;
+class ObjetoInteractivo;
+class Planos;
+class Llave;
+class Decoracion;
+class Cuadro;
 
 class Nivel1 : public Nivel {
 private:
@@ -20,21 +25,44 @@ private:
     // Cámara (para hacer scroll horizontal)
     float camaraX;
 
-    void crearMapa();
-    QPixmap tilePiso, tilePared, tileColumna, tilePuertaCerrada, tilePuertaAbierta, tileVentana,
-        tileLampara, tileSombra;
+    QPixmap tilePiso, tilePared, tileColumna, tilePuertaCerrada, tilePuertaAbierta, tileSombra;
 
     Jugador* jugador;
     QVector<Guardia*> guardias;
 
+    QVector<ObjetoInteractivo*> objetos;
+    Planos* planos1;
+    Planos* planos2;
+    Llave* llave;
+
+    QVector<Cuadro*> cuadros;
+    QVector<Decoracion*> decoraciones;
+
+    QPixmap spriteEscritorio, spriteSilla, spriteEstanteria;
+    QPixmap spriteArchivador, spriteMesaReuniones;
+
+    bool tienePlano1;
+    bool tienePlano2;
+    bool tieneLlave;
+    bool puertaAbierta;
+    QPointF posicionPuerta;
+    QPointF posicionSalida;
+
     int detecciones;
     int MAX_DETECCIONES = 3;
 
+    void crearMapa();
     void dibujarMapa(QPainter* painter);
     void actualizarCamara();
-
+    void crearObjetos();
     void crearGuardias();
     void verificarDetecciones();
+    void verificarInteracciones();
+    void verificarCaptura();
+    void abrirPuerta();
+    void crearDecoraciones();
+    void crearCuadros();
+    void verificarInteraccionCuadros();
 
 
 public:

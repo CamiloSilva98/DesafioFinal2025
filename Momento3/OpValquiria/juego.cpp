@@ -97,8 +97,22 @@ void Juego::actualizar()
         // Actualizar el nivel actual
         nivelActual->actualizar(0.016f); // delta time
 
-        // Verificar condiciones de victoria/derrota
-        // if (nivelActual->verificarCondicionVictoria()) { ... }
+        if (nivelActual->verificarCondicionVictoria())
+        {
+            qDebug() << "¡NIVEL COMPLETADO!";
+            estadoJuego = Estado::VICTORIA;
+            timer->stop();
+
+            // Aquí puedes agregar puntuación bonus
+            actualizarPuntuacion(1000);
+        }
+
+        // ⭐ Verificar condiciones de derrota
+        if (nivelActual->verificarCondicionDerrota())
+        {
+            qDebug() << "MISIÓN FALLIDA";
+            terminar();
+        }
     }
 
     update(); // Llama a paintEvent()
@@ -211,15 +225,37 @@ void Juego::dibujarPausa(QPainter& painter)
 
 void Juego::dibujarVictoria(QPainter& painter)
 {
+    // Fondo oscuro semi-transparente
+    painter.fillRect(rect(), QColor(0, 0, 0, 200));
+
+    // Título de victoria
     painter.setPen(Qt::green);
-    painter.setFont(QFont("Arial", 32, QFont::Bold));
-    painter.drawText(rect(), Qt::AlignCenter,
-                     QString("¡VICTORIA!\n\nPuntuación: %1").arg(puntuacion));
+    painter.setFont(QFont("Arial", 48, QFont::Bold));
+    painter.drawText(rect().adjusted(0, -350, 0, 0), Qt::AlignCenter, "¡MISIÓN COMPLETADA!");
+
+    // Detalles
+    painter.setPen(Qt::white);
+    painter.setFont(QFont("Arial", 20));
+
+    QString detalles = QString(
+                           "Nivel 1: La Guarida del Lobo\n\n"
+                           "Puntuación: %1\n"
+                           "Vidas restantes: %2\n\n"
+                           "¡Has obtenido los planos y escapado con éxito!"
+                           ).arg(puntuacion).arg(vidas);
+
+    painter.drawText(rect(), Qt::AlignCenter, detalles);
+
+    // Instrucciones
+    painter.setFont(QFont("Arial", 14));
+    painter.drawText(rect().adjusted(0, 250, 0, 0), Qt::AlignCenter,
+                     "Presiona ESPACIO para continuar al siguiente nivel\n"
+                     "Presiona ESC para volver al menú");
 }
 
 void Juego::dibujarDerrota(QPainter& painter)
 {
     painter.setPen(Qt::red);
-    painter.setFont(QFont("Arial", 32, QFont::Bold));
+    painter.setFont(QFont("Arial", 35, QFont::Bold));
     painter.drawText(rect(), Qt::AlignCenter, "MISIÓN FALLIDA");
 }

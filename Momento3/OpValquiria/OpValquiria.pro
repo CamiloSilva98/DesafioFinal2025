@@ -11,24 +11,34 @@ CONFIG += c++17
 
 SOURCES += \
     agenteinteligente.cpp \
+    cuadro.cpp \
+    decoracion.cpp \
     entidad.cpp \
     guardia.cpp \
     juego.cpp \
     jugador.cpp \
+    llave.cpp \
     main.cpp \
     mainwindow.cpp \
     nivel.cpp \
-    nivel1.cpp
+    nivel1.cpp \
+    objetointeractivo.cpp \
+    planos.cpp
 
 HEADERS += \
     agenteinteligente.h \
+    cuadro.h \
+    decoracion.h \
     entidad.h \
     guardia.h \
     juego.h \
     jugador.h \
+    llave.h \
     mainwindow.h \
     nivel.h \
-    nivel1.h
+    nivel1.h \
+    objetointeractivo.h \
+    planos.h
 
 FORMS += \
     mainwindow.ui

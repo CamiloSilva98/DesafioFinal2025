@@ -75,6 +75,7 @@ public:
     void investigar(float dt, QPointF objetivo);
     void perseguir(float dt);
     void buscar(float dt);
+    void actualizarDireccionVista(float dx, float dy);
 
     // Detección
     bool detectarJugador();
