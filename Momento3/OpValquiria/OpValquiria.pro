@@ -23,7 +23,8 @@ SOURCES += \
     nivel.cpp \
     nivel1.cpp \
     objetointeractivo.cpp \
-    planos.cpp
+    planos.cpp \
+    puerta.cpp
 
 HEADERS += \
     agenteinteligente.h \
@@ -38,7 +39,8 @@ HEADERS += \
     nivel.h \
     nivel1.h \
     objetointeractivo.h \
-    planos.h
+    planos.h \
+    puerta.h
 
 FORMS += \
     mainwindow.ui

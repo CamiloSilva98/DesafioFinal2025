@@ -13,6 +13,7 @@ class Planos;
 class Llave;
 class Decoracion;
 class Cuadro;
+class Puerta;
 
 class Nivel1 : public Nivel {
 private:
@@ -34,6 +35,7 @@ private:
     Planos* planos1;
     Planos* planos2;
     Llave* llave;
+    Puerta* puerta;
 
     QVector<Cuadro*> cuadros;
     QVector<Decoracion*> decoraciones;
@@ -62,8 +64,6 @@ private:
     void abrirPuerta();
     void crearDecoraciones();
     void crearCuadros();
-    void verificarInteraccionCuadros();
-
 
 public:
     Nivel1();

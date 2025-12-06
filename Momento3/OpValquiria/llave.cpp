@@ -30,16 +30,6 @@ void Llave::renderizar(QPainter* painter)
         // Fallback: Llave dorada
         painter->setBrush(QColor(255, 215, 0));
         painter->setPen(QPen(QColor(180, 150, 0), 2));
-
-        // Cabeza de la llave (círculo)
-        painter->drawEllipse(x, y, 12, 12);
-
-        // Cuerpo de la llave
-        painter->drawRect(x + 10, y + 5, 12, 3);
-
-        // Dientes de la llave
-        painter->drawLine(x + 18, y + 5, x + 18, y + 2);
-        painter->drawLine(x + 22, y + 5, x + 22, y + 3);
     }
 }
 

@@ -16,7 +16,7 @@ Juego::Juego(QWidget* parent)
     connect(timer, &QTimer::timeout, this, &Juego::actualizar);
 
     // Configurar la ventana
-    setFixedSize(1550, 770);
+    setFixedSize(1250, 770);
     setFocusPolicy(Qt::StrongFocus);
 }
 

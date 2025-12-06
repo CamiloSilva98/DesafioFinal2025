@@ -18,6 +18,9 @@ Jugador::Jugador(float x, float y)
     tiempoAnimacion(0),
     frameActual(0)
 {
+    hitboxOffsetY = alto * 0.70f;
+    hitboxAlto = alto * 0.30f;
+
     qDebug() << "Jugador creado en posición:" << x << "," << y;
 
     sprites.resize(8);
@@ -328,6 +331,7 @@ void Jugador::renderizar(QPainter* painter)
 
     if (!spriteActual.isNull())
     {
+        // Dibujar sprite completo
         painter->drawPixmap(x, y, ancho, alto, spriteActual);
     }
     else

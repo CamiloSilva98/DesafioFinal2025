@@ -21,7 +21,7 @@ void Decoracion::cargarSprite()
     case TipoDecoracion::ESCRITORIO:
         rutaSprite = ":/sprites/sprites/mesaB.png";
         break;
-    case TipoDecoracion::SILLA:
+    case TipoDecoracion::SOFA:
         rutaSprite = ":/sprites/sprites/sofa.png";
         break;
     case TipoDecoracion::ESTANTERIA:
@@ -36,15 +36,17 @@ void Decoracion::cargarSprite()
     case TipoDecoracion::MESA:
         rutaSprite = ":/sprites/sprites/table.png";
         break;
-    case TipoDecoracion::LAMPARA_PIE:
+    case TipoDecoracion::CABALLETE:
         rutaSprite = ":/sprites/sprites/caballete.png";
         break;
-    case TipoDecoracion::MACETA:
+    case TipoDecoracion::COFRE:
         rutaSprite = ":/sprites/sprites/cofre.png";
         break;
     case TipoDecoracion::CUADRO_DECORATIVO:
         rutaSprite = ":/sprites/sprites/AH.png";
         break;
+    case TipoDecoracion::MESAL:
+        rutaSprite = ":/sprites/sprites/Mesa.png";
     }
 
     sprite = QPixmap(rutaSprite);

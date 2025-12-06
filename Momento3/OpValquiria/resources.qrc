@@ -55,6 +55,11 @@
         <file>sprites/sofa.png</file>
         <file>sprites/planta.png</file>
         <file>sprites/table.png</file>
+        <file>sprites/Mesa.png</file>
+        <file>sprites/Puerta1.png</file>
+        <file>sprites/Puerta2.png</file>
+        <file>sprites/Puerta3.png</file>
+        <file>sprites/Puerta4.png</file>
     </qresource>
     <qresource prefix="/sound">
         <file>sounds/alarm-1-with-reverberation-30031.mp3</file>
