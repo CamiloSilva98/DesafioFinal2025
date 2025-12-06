@@ -1,5 +1,6 @@
 #include "guardia.h"
 #include "jugador.h"
+#include "nivel1.h"
 #include <QPainter>
 #include <QPainterPath>
 #include <QDebug>
@@ -18,9 +19,13 @@ Guardia::Guardia(float x, float y, const QVector<QPointF>& ruta)
     tiempoBusqueda(0.0f),
     tiempoMaximoBusqueda(5.0f),
     jugadorObjetivo(nullptr),
+    nivelRef(nullptr),
     direccionActual(DireccionGuardia::ABAJO),
     frameActual(0),
-    tiempoAnimacion(0.0f)
+    tiempoAnimacion(0.05f),
+    intentandoRodear(false),
+    puntoRodeo(QPointF(0, 0)),
+    tiempoAtascado(0.8f)
 {
     estadoActual = EstadoAgente::PATRULLANDO;
     sprites.resize(4);
@@ -85,6 +90,44 @@ void Guardia::cargarSprites()
     qDebug() << "=== FIN CARGA SPRITES GUARDIA ===";
 }
 
+bool Guardia::verificarColision(float newX, float newY)
+{
+    if (!nivelRef) return false;
+
+    // Verificar colisión con el nivel (usa hitbox del guardia)
+    return nivelRef->hayColision(newX, newY, ancho, alto);
+}
+bool Guardia::hayLineaDeVista(QPointF desde, QPointF hasta)
+{
+    if (!nivelRef) return true;  // Sin nivel, asumir que puede ver
+
+    // Calcular la distancia total
+    float dx = hasta.x() - desde.x();
+    float dy = hasta.y() - desde.y();
+    float distancia = std::sqrt(dx*dx + dy*dy);
+
+    // Número de puntos a verificar (cada 16 píxeles aproximadamente)
+    int pasos = (int)(distancia / 16.0f);
+    if (pasos < 2) pasos = 2;
+
+    // Incremento por paso
+    float stepX = dx / pasos;
+    float stepY = dy / pasos;
+
+    // Verificar cada punto en la línea
+    for (int i = 1; i < pasos; i++) {
+        float checkX = desde.x() + stepX * i;
+        float checkY = desde.y() + stepY * i;
+
+        // Si hay una pared en este punto, no hay línea de vista
+        if (nivelRef->hayColision(checkX, checkY, 1, 1))
+        {
+            return false;  // ¡Hay una pared bloqueando!
+        }
+    }
+
+    return true;  // Línea de vista despejada
+}
 int Guardia::getNumFrames(DireccionGuardia dir) const
 {
     int dirIndex = static_cast<int>(dir);
@@ -325,7 +368,7 @@ void Guardia::renderizar(QPainter* painter)
         painter->drawRect(x, y, ancho, alto);
     }
 
-    // Dibujar campo de visión
+    // Dibujar campo de visión, borrar
     painter->save();
     painter->translate(x + ancho/2, y + alto/2);
     painter->rotate(direccionVista);
@@ -343,19 +386,12 @@ void Guardia::renderizar(QPainter* painter)
 
     painter->restore();
 
+
+
     // Indicador de estado
     painter->setPen(Qt::white);
     painter->setFont(QFont("Arial", 8));
 
-    QString estadoTexto;
-    switch (estadoActual) {
-    case EstadoAgente::PATRULLANDO: estadoTexto = "PATROL"; break;
-    case EstadoAgente::INVESTIGANDO: estadoTexto = "CHECK"; break;
-    case EstadoAgente::PERSIGUIENDO: estadoTexto = "CHASE!"; break;
-    case EstadoAgente::BUSCANDO: estadoTexto = "SEARCH"; break;
-    }
-
-    painter->drawText(x - 10, y - 5, estadoTexto);
 
     // Debug: mostrar frame actual
     painter->setPen(Qt::yellow);
@@ -420,8 +456,9 @@ void Guardia::buscar(float dt)
     tiempoBusqueda += dt;
 
     // Rotar lentamente mirando alrededor
-    direccionVista += 30.0f * dt;
-    if (direccionVista > 360.0f) {
+    direccionVista += 95.0f * dt;
+    if (direccionVista > 360.0f)
+    {
         direccionVista -= 360.0f;
     }
 }
@@ -435,17 +472,27 @@ bool Guardia::detectarJugador()
     if (!jugadorObjetivo) return false;
 
     // El jugador está oculto = no se puede ver
-    if (jugadorObjetivo->estaOculto()) {
+    if (jugadorObjetivo->estaOculto())
+    {
         return false;
     }
 
     // Calcular distancia
     float distancia = calcularDistanciaAJugador();
 
-    if (distancia > rangoVision) {
+    if (distancia > rangoVision)
+    {
         return false;  // Muy lejos
     }
+    QPointF posGuardia(x + ancho/2, y + alto/2);
+    QPointF posJugador = jugadorObjetivo->obtenerPosicion();
+    posJugador.setX(posJugador.x() + jugadorObjetivo->getAncho()/2);
+    posJugador.setY(posJugador.y() + jugadorObjetivo->getAlto()/2);
 
+    if (!hayLineaDeVista(posGuardia, posJugador))
+    {
+        return false;  // ¡HAY UNA PARED BLOQUEANDO!
+    }
     // Calcular ángulo al jugador
     float anguloAJugador = calcularAnguloAJugador();
 
@@ -458,14 +505,78 @@ bool Guardia::detectarRuido()
     if (!jugadorObjetivo) return false;
 
     // Solo detecta ruido si el jugador está corriendo
-    if (!jugadorObjetivo->estaCorriendo() ) {
+    if (jugadorObjetivo->estaAgachado()) {
         return false;
     }
 
     float distancia = calcularDistanciaAJugador();
-    return distancia < rangoAuditivo;
-}
 
+    // Si está fuera del rango auditivo, no puede escuchar
+    if (distancia >= rangoAuditivo) {
+        return false;
+    }
+
+    // ✓ NUEVO: Verificar que no haya paredes bloqueando el sonido
+    // El sonido se atenúa con las paredes, pero puede atravesar algunas
+    QPointF posGuardia(x + ancho/2, y + alto/2);
+    QPointF posJugador = jugadorObjetivo->obtenerPosicion();
+    posJugador.setX(posJugador.x() + jugadorObjetivo->getAncho()/2);
+    posJugador.setY(posJugador.y() + jugadorObjetivo->getAlto()/2);
+
+    // Contar cuántas paredes hay entre el guardia y el jugador
+    int paredesEntreMedio = contarParedesEnLinea(posGuardia, posJugador);
+
+    // Si hay más de 2 paredes, el sonido está muy atenuado
+    if (paredesEntreMedio > 2) {
+        return false;
+    }
+
+    // Si hay 1-2 paredes, reducir el rango efectivo
+    float rangoEfectivo = rangoAuditivo;
+    if (paredesEntreMedio > 0) {
+        rangoEfectivo = rangoAuditivo * 0.5f; // 50% del rango con paredes
+    }
+
+    return distancia < rangoEfectivo;
+}
+int Guardia::contarParedesEnLinea(QPointF desde, QPointF hasta)
+{
+    if (!nivelRef) return 0;
+
+    float dx = hasta.x() - desde.x();
+    float dy = hasta.y() - desde.y();
+    float distancia = std::sqrt(dx*dx + dy*dy);
+
+    int pasos = (int)(distancia / 16.0f);
+    if (pasos < 2) pasos = 2;
+
+    float stepX = dx / pasos;
+    float stepY = dy / pasos;
+
+    int contadorParedes = 0;
+    bool enPared = false;
+
+    for (int i = 1; i < pasos; i++)
+    {
+        float checkX = desde.x() + stepX * i;
+        float checkY = desde.y() + stepY * i;
+
+        bool hayPared = nivelRef->hayColision(checkX, checkY, 1, 1);
+
+        // Contar solo cuando entra a una nueva pared (evitar contar la misma pared múltiples veces)
+        if (hayPared && !enPared)
+        {
+            contadorParedes++;
+            enPared = true;
+        }
+        else if (!hayPared)
+        {
+            enPared = false;
+        }
+    }
+
+    return contadorParedes;
+}
 void Guardia::rotarVision(float dt)
 {
     // Rotación lenta mientras patrulla
@@ -524,17 +635,186 @@ void Guardia::moverHaciaPunto(QPointF objetivo, float velocidad, float dt)
 
     float distancia = std::sqrt(dx*dx + dy*dy);
 
-    if (distancia > 1.0f)
+    if (distancia > 1.0f) {
+        // Normalizar
+        float dxNorm = dx / distancia;
+        float dyNorm = dy / distancia;
+
+        // Actualizar dirección de vista
+        actualizarDireccionVista(dxNorm, dyNorm);
+        actualizarDireccionSprite(dxNorm, dyNorm);
+
+        float prevX = x;
+        float prevY = y;
+
+        // Calcular nueva posición
+        float movX = dxNorm * velocidad * dt;
+        float movY = dyNorm * velocidad * dt;
+
+        float newX = x + movX;
+        float newY = y + movY;
+
+        //VERIFICAR COLISIÓN antes de mover
+        if (!verificarColision(newX, newY))
+        {
+            // No hay colisión, mover normalmente
+            x = newX;
+            y = newY;
+            velocidadX = movX / dt;
+            velocidadY = movY / dt;
+        }
+        else
+        {
+            bool movioAlgo = false;
+
+            // Intentar solo movimiento en X
+            if (!verificarColision(newX, prevY))
+            {
+                x = newX;
+                y = prevY;
+                velocidadX = movX / dt;
+                velocidadY = 0;
+                movioAlgo = true;
+            }
+            // Intentar solo movimiento en Y
+            else if (!verificarColision(prevX, newY))
+            {
+                x = prevX;
+                y = newY;
+                velocidadX = 0;
+                velocidadY = movY / dt;
+                movioAlgo = true;
+            }
+            if (!movioAlgo)
+            {
+                velocidadX = 0;
+                velocidadY = 0;
+                tiempoAtascado += dt;
+
+                // Si lleva más de 1 segundo atascado, intentar rodeo
+                if (tiempoAtascado > 1.0f)
+                {
+                    intentarRodearObstaculo(objetivo, dt);
+                }
+
+                // Si está persiguiendo y lleva mucho tiempo atascado, abandonar
+                if (estadoActual == EstadoAgente::PERSIGUIENDO && tiempoAtascado > 3.0f) {
+                    qDebug() << "Guardia atascado demasiado tiempo, volviendo a patrullar";
+                    cambiarEstado(EstadoAgente::PATRULLANDO);
+                    tiempoAtascado = 0.0f;
+                }
+            } else {
+                tiempoAtascado = 0.0f;
+            }
+        }
+    } else {
+        velocidadX = 0;
+        velocidadY = 0;
+        tiempoAtascado = 0.0f;
+        intentandoRodear = false;
+    }
+}
+void Guardia::intentarRodearObstaculo(QPointF objetivo, float dt)
+{
+    const float TILE_SIZE = 64.0f;
+
+    // Calcular dirección general hacia el objetivo
+    float dx = objetivo.x() - x;
+    float dy = objetivo.y() - y;
+
+    // Intentar 4 direcciones alternativas en orden de prioridad
+    QVector<QPointF> direccionesIntento;
+
+    // Si el objetivo está principalmente a la derecha/izquierda
+    if (std::abs(dx) > std::abs(dy)) {
+        if (dy > 0) {
+            // Objetivo abajo-derecha/izquierda: intentar bajar
+            direccionesIntento.append(QPointF(x, y + TILE_SIZE));
+            direccionesIntento.append(QPointF(x, y - TILE_SIZE));
+        } else {
+            // Objetivo arriba-derecha/izquierda: intentar subir
+            direccionesIntento.append(QPointF(x, y - TILE_SIZE));
+            direccionesIntento.append(QPointF(x, y + TILE_SIZE));
+        }
+
+        if (dx > 0) {
+            direccionesIntento.append(QPointF(x + TILE_SIZE, y));
+        } else {
+            direccionesIntento.append(QPointF(x - TILE_SIZE, y));
+        }
+    }
+    // Si el objetivo está principalmente arriba/abajo
+    else {
+        if (dx > 0) {
+            // Objetivo derecha-arriba/abajo: intentar ir a la derecha
+            direccionesIntento.append(QPointF(x + TILE_SIZE, y));
+            direccionesIntento.append(QPointF(x - TILE_SIZE, y));
+        } else {
+            // Objetivo izquierda-arriba/abajo: intentar ir a la izquierda
+            direccionesIntento.append(QPointF(x - TILE_SIZE, y));
+            direccionesIntento.append(QPointF(x + TILE_SIZE, y));
+        }
+
+        if (dy > 0) {
+            direccionesIntento.append(QPointF(x, y + TILE_SIZE));
+        } else {
+            direccionesIntento.append(QPointF(x, y - TILE_SIZE));
+        }
+    }
+
+    // Probar cada dirección
+    for (const QPointF& nuevaPosicion : direccionesIntento)
     {
-        dx = dx / distancia;
-        dy = dy / distancia;
+        if (!verificarColision(nuevaPosicion.x(), nuevaPosicion.y()))
+        {
+            // Encontró un camino libre, moverse hacia allí
+            float dirX = nuevaPosicion.x() - x;
+            float dirY = nuevaPosicion.y() - y;
+            float dist = std::sqrt(dirX*dirX + dirY*dirY);
 
-        actualizarDireccionSprite(dx, dy);
+            if (dist > 0)
+            {
+                float vel = VEL_PATRULLA; // Más lento al rodear
+                if (estadoActual == EstadoAgente::PERSIGUIENDO)
+                {
+                    vel = VEL_INVESTIGAR; // Velocidad media
+                }
 
-        dx *= velocidad * dt;
-        dy *= velocidad * dt;
+                float movX = (dirX / dist) * vel * dt;
+                float movY = (dirY / dist) * vel * dt;
 
-        x += dx;
-        y += dy;
+                x += movX;
+                y += movY;
+                velocidadX = movX / dt;
+                velocidadY = movY / dt;
+
+                actualizarDireccionSprite(dirX, dirY);
+                actualizarDireccionVista(dirX, dirY);
+
+                tiempoAtascado = 0.0f;
+                return;
+            }
+        }
+    }
+
+    // Si no encontró ninguna dirección libre, quedarse quieto
+    velocidadX = 0;
+    velocidadY = 0;
+}
+void Guardia::actualizarDireccionVista(float dx, float dy)
+{
+    // Solo actualizar si hay movimiento significativo
+    if (std::abs(dx) > 0.1f || std::abs(dy) > 0.1f)
+    {
+        // Calcular ángulo del movimiento en grados
+        float angulo = std::atan2(dy, dx) * 180.0f / M_PI;
+
+        // Normalizar a rango 0-360
+        if (angulo < 0)
+        {
+            angulo += 360.0f;
+        }
+
+        direccionVista = angulo;
     }
 }
