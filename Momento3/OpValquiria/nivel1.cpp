@@ -32,10 +32,12 @@ Nivel1::Nivel1()
     tienePlano2(false),
     tieneLlave(false),
     puertaAbierta(false),
-    detecciones(0)
+    detecciones(0),
+    esperandoDerrota(false),
+    tiempoEsperaDerrota(0.0f)
 {
     posicionPuerta = QPointF(41 * 64, 1 * 64);
-    posicionSalida = QPointF(41 * 64, 2 * 64);
+    posicionSalida = QPointF(41 * 64, 10);
 }
 
 Nivel1::~Nivel1()
@@ -80,7 +82,7 @@ void Nivel1::inicializar()
     jugador = new Jugador(80, 320);
     qDebug() << "Jugador creado!";
 
-    //crearGuardias();
+    crearGuardias();
     crearObjetos();
     crearDecoraciones();
 
@@ -93,6 +95,8 @@ void Nivel1::inicializar()
     tieneLlave = false;
     puertaAbierta = false;
     completado = false;
+    esperandoDerrota = false;
+    tiempoEsperaDerrota = 0.0f;
 }
 void Nivel1::crearObjetos()
 {
@@ -409,8 +413,24 @@ void Nivel1::crearMapa()
 
 void Nivel1::actualizar(float dt)
 {
+    if (esperandoDerrota)
+    {
+        tiempoEsperaDerrota += dt;
+
+        if (jugador) jugador->actualizar(dt);
+
+        return;
+    }
     if (jugador)
     {
+        if (jugador->estaMuerto() && !esperandoDerrota)
+        {
+            qDebug() << "¡Jugador muerto! Iniciando delay de derrota...";
+            esperandoDerrota = true;
+            tiempoEsperaDerrota = 0.0f;
+            jugador->actualizar(dt);
+            return;
+        }
         if (jugador->estaMuerto())
         {
             jugador->actualizar(dt);
@@ -593,7 +613,7 @@ void Nivel1::renderizar(QPainter* painter)
     painter->drawText(10, 15, "Nivel 1: La Guarida del Lobo");
 
     painter->setFont(QFont("Arial", 9));
-    painter->drawText(10, 45, "WASD - Mover | Shift - Correr | C - Agacharse");
+    painter->drawText(10, 45, "WASD - Mover | Shift - Correr | C - Agacharse| E - Interactuar");
     if (jugador && !jugador->estaMuerto())
     {
         // Detecciones
@@ -810,7 +830,11 @@ bool Nivel1::verificarCondicionVictoria()
 }
 bool Nivel1::verificarCondicionDerrota()
 {
-    if (jugador && jugador->estaMuerto()) return true;
+    if (esperandoDerrota && tiempoEsperaDerrota >= DELAY_DERROTA)
+    {
+        return true;
+    }
+
     return detecciones >= MAX_DETECCIONES;
 }
 

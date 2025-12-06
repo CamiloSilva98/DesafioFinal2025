@@ -11,6 +11,7 @@ CONFIG += c++17
 
 SOURCES += \
     agenteinteligente.cpp \
+    avion.cpp \
     cuadro.cpp \
     decoracion.cpp \
     entidad.cpp \
@@ -20,14 +21,18 @@ SOURCES += \
     llave.cpp \
     main.cpp \
     mainwindow.cpp \
+    misil.cpp \
     nivel.cpp \
     nivel1.cpp \
+    nivel3.cpp \
     objetointeractivo.cpp \
+    obstaculo.cpp \
     planos.cpp \
     puerta.cpp
 
 HEADERS += \
     agenteinteligente.h \
+    avion.h \
     cuadro.h \
     decoracion.h \
     entidad.h \
@@ -36,9 +41,12 @@ HEADERS += \
     jugador.h \
     llave.h \
     mainwindow.h \
+    misil.h \
     nivel.h \
     nivel1.h \
+    nivel3.h \
     objetointeractivo.h \
+    obstaculo.h \
     planos.h \
     puerta.h
 

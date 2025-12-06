@@ -53,6 +53,10 @@ private:
     int detecciones;
     int MAX_DETECCIONES = 3;
 
+    bool esperandoDerrota;
+    float tiempoEsperaDerrota;
+    const float DELAY_DERROTA = 2.0f;
+
     void crearMapa();
     void dibujarMapa(QPainter* painter);
     void actualizarCamara();

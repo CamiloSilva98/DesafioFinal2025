@@ -3,6 +3,7 @@
 #include <QPainter>
 #include <QKeyEvent>
 #include "nivel1.h"
+#include "nivel3.h"
 
 Juego::Juego(QWidget* parent)
     : QMainWindow(parent),
@@ -35,7 +36,7 @@ void Juego::iniciar()
     vidas = 3;
 
     // Iniciar el nivel 1 (lo implementarán después)
-    cambiarNivel(1);
+    cambiarNivel(3);
 
     // Iniciar el loop del juego
     timer->start(16); // ~60 FPS
@@ -43,8 +44,6 @@ void Juego::iniciar()
 
 void Juego::cambiarNivel(int nivel)
 {
-    // Por ahora solo un placeholder
-    // Después crearán los niveles específicos
     if (nivelActual != nullptr)
     {
         delete nivelActual;
@@ -55,11 +54,16 @@ void Juego::cambiarNivel(int nivel)
     switch(nivel)
     {
         case 1:
-        nivelActual = new Nivel1();
-        nivelActual->inicializar();
-        break;
-    //     case 2: nivelActual = new Nivel2Ensamblaje(); break;
-    //     case 3: nivelActual = new Nivel3Escape(); break;
+            nivelActual = new Nivel1();
+            nivelActual->inicializar();
+            break;
+
+            //    case 2: nivelActual = new Nivel2Ensamblaje(); break;
+
+        case 3:
+            nivelActual = new Nivel3();
+            nivelActual->inicializar();
+            break;
     }
 }
 
@@ -102,12 +106,8 @@ void Juego::actualizar()
             qDebug() << "¡NIVEL COMPLETADO!";
             estadoJuego = Estado::VICTORIA;
             timer->stop();
-
-            // Aquí puedes agregar puntuación bonus
             actualizarPuntuacion(1000);
         }
-
-        // ⭐ Verificar condiciones de derrota
         if (nivelActual->verificarCondicionDerrota())
         {
             qDebug() << "MISIÓN FALLIDA";
@@ -132,7 +132,6 @@ void Juego::keyPressEvent(QKeyEvent* event)
         }
         break;
     default:
-        // ⭐ PASAR TODAS LAS TECLAS AL NIVEL
         if (nivelActual && estadoJuego == Estado::JUGANDO)
         {
             Nivel1* nivel1 = dynamic_cast<Nivel1*>(nivelActual);
