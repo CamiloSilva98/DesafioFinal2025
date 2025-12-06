@@ -20,6 +20,7 @@ SOURCES += \
     maletin.cpp \
     nivel.cpp \
     nivel1.cpp \
+    nivel2.cpp \
     pieza.cpp
 
 HEADERS += \
@@ -32,6 +33,7 @@ HEADERS += \
     maletin.h \
     nivel.h \
     nivel1.h \
+    nivel2.h \
     pieza.h
 
 FORMS += \
