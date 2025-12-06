@@ -2,7 +2,9 @@
 #include "juego.h"
 #include <QPainter>
 #include <QKeyEvent>
+#include <QMouseEvent>
 #include "nivel1.h"
+#include "nivel2.h"
 
 Juego::Juego(QWidget* parent)
     : QMainWindow(parent),
@@ -34,11 +36,13 @@ void Juego::iniciar()
     puntuacion = 0;
     vidas = 3;
 
-    // Iniciar el nivel 1 (lo implementarán después)
-    cambiarNivel(1);
 
-    // Iniciar el loop del juego
-    timer->start(16); // ~60 FPS
+    //cambiarNivel(1); // Iniciar el nivel 1
+    //timer->start(16); // ~60 FPS // Iniciar el loop del juego
+
+    // Iniciar directamente el nivel 2
+    cambiarNivel(2);
+    timer->start(16);
 }
 
 void Juego::cambiarNivel(int nivel)
@@ -54,13 +58,22 @@ void Juego::cambiarNivel(int nivel)
     // TODO: crear niveles según el número
     switch(nivel)
     {
-        case 1:
-        nivelActual = new Nivel1();
-        nivelActual->inicializar();
-        break;
+        //case 1:
+        //nivelActual = new Nivel1();
+        //nivelActual->inicializar();
+        //break;
+
+        case 2:
+            nivelActual = new Nivel2();
+            break;
     //     case 2: nivelActual = new Nivel2Ensamblaje(); break;
     //     case 3: nivelActual = new Nivel3Escape(); break;
     }
+
+    if (nivelActual) {
+        nivelActual->inicializar();
+     }
+
 }
 
 void Juego::actualizarPuntuacion(int puntos)
@@ -90,13 +103,29 @@ void Juego::terminar()
 
 void Juego::actualizar()
 {
-    // Este método se llama 60 veces por segundo
-
     if (estadoJuego == Estado::JUGANDO && nivelActual != nullptr)
     {
-        // Actualizar el nivel actual
         nivelActual->actualizar(0.016f); // delta time
 
+<<<<<<< HEAD
+        if (nivelActual->verificarCondicionVictoria()) {
+            estadoJuego = Estado::VICTORIA;
+            timer->stop();
+        } else if (nivelActual->verificarCondicionDerrota()) {
+            // Diferenciar por nivel
+            if (nivelActual->getNumeroNivel() == 1) {
+                // Nivel 1: usar sistema de vidas
+                vidas--;
+                if (vidas > 0) {
+                    cambiarNivel(1);  // reiniciar nivel 1
+                } else {
+                    terminar();  // Game Over
+                }
+            } else if (nivelActual->getNumeroNivel() == 2) {
+                // Nivel 2: derrota directa (sin vidas)
+                terminar();  // Game Over inmediato
+            }
+=======
         if (nivelActual->verificarCondicionVictoria())
         {
             qDebug() << "¡NIVEL COMPLETADO!";
@@ -112,10 +141,11 @@ void Juego::actualizar()
         {
             qDebug() << "MISIÓN FALLIDA";
             terminar();
+>>>>>>> origin/main
         }
     }
 
-    update(); // Llama a paintEvent()
+    update(); // Redibuja
 }
 
 void Juego::keyPressEvent(QKeyEvent* event)
@@ -155,6 +185,38 @@ void Juego::keyReleaseEvent(QKeyEvent* event)
     }
 }
 
+void Juego::mousePressEvent(QMouseEvent* event)
+{
+    if (!nivelActual || estadoJuego != Estado::JUGANDO) return;
+
+    Nivel2* n2 = dynamic_cast<Nivel2*>(nivelActual);
+    if (n2) {
+        n2->manejarMousePress(event->pos());
+    }
+}
+
+void Juego::mouseMoveEvent(QMouseEvent* event)
+{
+    if (!nivelActual || estadoJuego != Estado::JUGANDO) return;
+
+    Nivel2* n2 = dynamic_cast<Nivel2*>(nivelActual);
+    if (n2) {
+        n2->manejarMouseMove(event->pos());
+    }
+}
+
+void Juego::mouseReleaseEvent(QMouseEvent* event)
+{
+    if (!nivelActual || estadoJuego != Estado::JUGANDO) return;
+
+    Nivel2* n2 = dynamic_cast<Nivel2*>(nivelActual);
+    if (n2) {
+        n2->manejarMouseRelease(event->pos());
+    }
+}
+
+
+
 void Juego::paintEvent(QPaintEvent* event)
 {
     QPainter painter(this);
@@ -172,7 +234,11 @@ void Juego::paintEvent(QPaintEvent* event)
         {
             nivelActual->renderizar(&painter);
         }
-        dibujarHUD(painter);
+
+        // Solo mostrar HUD de vidas/puntuación en el Nivel 1
+        if (nivelActual && nivelActual->getNumeroNivel() == 1) {
+            dibujarHUD(painter);
+        }
         break;
     case Estado::PAUSADO:
         if (nivelActual != nullptr)

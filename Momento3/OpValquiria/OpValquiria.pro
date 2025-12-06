@@ -20,11 +20,15 @@ SOURCES += \
     llave.cpp \
     main.cpp \
     mainwindow.cpp \
+    maletin.cpp \
     nivel.cpp \
-    nivel1.cpp \
+    nivell.cpp \
+    nivel2.cpp \
+    pieza.cpp \
     objetointeractivo.cpp \
     planos.cpp \
-    puerta.cpp
+    puerta.cpp\
+    origin/main
 
 HEADERS += \
     agenteinteligente.h \
@@ -36,8 +40,11 @@ HEADERS += \
     jugador.h \
     llave.h \
     mainwindow.h \
+    maletin.h \
     nivel.h \
-    nivel1.h \
+    nivell.h \
+    nivel2.h \
+    pieza.h \
     objetointeractivo.h \
     planos.h \
     puerta.h
