@@ -36,6 +36,9 @@ private:
     static constexpr float VEL_CORRIENDO = 220.0f;
     static constexpr float VEL_AGACHADO = 60.0f;
 
+    float hitboxOffsetY;
+    float hitboxAlto;
+
     // Control de teclas
     bool teclaIzquierda;
     bool teclaDerecha;
@@ -85,6 +88,9 @@ public:
     void setOculto(bool valor) { oculto = valor; }
     void morir();
     void cargarSprites();
+
+    float getHitboxY() const { return y + hitboxOffsetY; }
+    float getHitboxAlto() const { return hitboxAlto;}
 
     int getNumFrames(Direccion dir) const;
     Direccion getDireccion() const { return direccionActual; }

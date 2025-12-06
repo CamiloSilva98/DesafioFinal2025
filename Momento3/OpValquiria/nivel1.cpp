@@ -8,6 +8,7 @@
 #include "objetointeractivo.h"
 #include "planos.h"
 #include "llave.h"
+#include "puerta.h"
 #include <QKeyEvent>
 
 enum TipoTile
@@ -26,6 +27,7 @@ Nivel1::Nivel1()
     planos1(nullptr),
     planos2(nullptr),
     llave(nullptr),
+    puerta(nullptr),
     tienePlano1(false),
     tienePlano2(false),
     tieneLlave(false),
@@ -75,12 +77,13 @@ void Nivel1::inicializar()
     crearMapa();
     qDebug() << "Mapa creado!";
 
-    jugador = new Jugador(80, 150);
+    jugador = new Jugador(80, 320);
     qDebug() << "Jugador creado!";
 
-    crearGuardias();
+    //crearGuardias();
     crearObjetos();
     crearDecoraciones();
+
     detecciones = 0;
     qDebug() << "Jugador creado!";
     qDebug() << "Guardias creados:" << guardias.size();
@@ -95,17 +98,27 @@ void Nivel1::crearObjetos()
 {
     qDebug() << "=== CREANDO OBJETOS ===";
 
-    // PLANO 1: En las oficinas (habitación 2)
-    planos1 = new Planos(35 * 64, 4 * 64);
+    planos1 = new Planos(20 * 64, 4 * 64);
     objetos.append(planos1);
 
-    // PLANO 2: En la sala de reuniones (habitación 3)
-    planos2 = new Planos(44 * 64, 3 * 64);
+    planos2 = new Planos(43 * 64 + 5, 4 * 64 + 5);
+    planos2->setActivo(false);
     objetos.append(planos2);
 
-    // LLAVE: En el pasillo central (escondida entre cajas)
-    llave = new Llave(20 * 64, 4 * 64, "puerta_salida");
+    llave = new Llave(6 * 64 + 10, 1 * 64 + 5, "puerta_salida");
+    llave->setActivo(false);
     objetos.append(llave);
+
+    Cuadro* cuadro1 = new Cuadro(6 * 64, 1 * 64, 5, 1, llave);
+    cuadros.append(cuadro1);
+
+    Cuadro* cuadro2 = new Cuadro(43 * 64, 4 * 64, 43, 4, planos2);
+    cuadros.append(cuadro2);
+
+    puerta = new Puerta(41 * 64, 1 * 64);
+    objetos.append(puerta);
+
+
 
     qDebug() << "Objetos creados:" << objetos.size();
 }
@@ -117,151 +130,115 @@ void Nivel1::crearDecoraciones()
     // HABITACIÓN 1: ENTRADA
     // ============================================
 
-    // Escritorios en las esquinas
     decoraciones.append(new Decoracion(1*64, 2*64 - 30, 60, 50,
                                        TipoDecoracion::ESCRITORIO, true));
     decoraciones.append(new Decoracion(10*64 + 15, 2*64 - 30, 60, 50,
                                        TipoDecoracion::ESCRITORIO, true));
-
-    // Sillas junto a escritorios
     decoraciones.append(new Decoracion(2*64, 2*64 - 28, 40, 40,
-                                       TipoDecoracion::SILLA, true));
+                                       TipoDecoracion::SOFA, true));
     decoraciones.append(new Decoracion(9*64 + 25, 2*64 - 25, 40, 40,
-                                       TipoDecoracion::SILLA, true));
-    decoraciones.append(new Decoracion(6*64+6, 1*64, 50, 55,
-                                       TipoDecoracion::CUADRO_DECORATIVO, false));
-    // Plantas decorativas (NO sólidas)
+                                       TipoDecoracion::SOFA, true));
     decoraciones.append(new Decoracion(1*64, 3*64, 40, 40,
-                                       TipoDecoracion::PLANTA, false));
+                                       TipoDecoracion::PLANTA, true));
     decoraciones.append(new Decoracion(1*64, 6*64, 40, 40,
-                                       TipoDecoracion::PLANTA, false));
+                                       TipoDecoracion::PLANTA, true));
     decoraciones.append(new Decoracion(11*64 + 20, 2*64 - 25, 40, 40,
-                                       TipoDecoracion::PLANTA, false));
+                                       TipoDecoracion::PLANTA, true));
     decoraciones.append(new Decoracion(11*64 + 20, 6*64, 30, 50,
-                                       TipoDecoracion::LAMPARA_PIE, true));
+                                       TipoDecoracion::CABALLETE, true));
 
     // ============================================
-    // PASILLO CENTRAL
+    // HABITACIÓN 2
     // ============================================
 
-    // Archivador en el pasillo
     decoraciones.append(new Decoracion(27*64-6, 2*64 - 50, 70, 70,
                                        TipoDecoracion::ESTANTERIA, true));
-
-    // Macetas decorativas en el pasillo
     decoraciones.append(new Decoracion(14*64 - 29, 2*64 - 16, 35, 35,
-                                       TipoDecoracion::MACETA, false));
+                                       TipoDecoracion::COFRE, true));
     decoraciones.append(new Decoracion(13*64, 2*64 - 16, 35, 35,
-                                       TipoDecoracion::MACETA, false));
+                                       TipoDecoracion::COFRE, true));
     decoraciones.append(new Decoracion(20*64, 1*64, 50, 55,
                                        TipoDecoracion::CUADRO_DECORATIVO, false));
     decoraciones.append(new Decoracion(20*64 - 40, 4*64, 120, 70,
                                        TipoDecoracion::MESA, true));
+    decoraciones.append(new Decoracion(24 * 64 + 24, 6 * 64, 40, 122,
+                                       TipoDecoracion::MESAL, true));
 
     // ============================================
-    // HABITACIÓN 2: OFICINAS
+    // HABITACIÓN 3
     // ============================================
 
-    // Escritorios en las oficinas
-    decoraciones.append(new Decoracion(30*64, 3*64, 60, 50,
-                                       TipoDecoracion::ESCRITORIO, true));
-    decoraciones.append(new Decoracion(34*64, 3*64, 60, 50,
-                                       TipoDecoracion::ESCRITORIO, true));
-    decoraciones.append(new Decoracion(38*64, 3*64, 60, 50,
-                                       TipoDecoracion::ESCRITORIO, true));
-
-    // Sillas
-    decoraciones.append(new Decoracion(30*64, 4*64 + 10, 40, 40,
-                                       TipoDecoracion::SILLA, true));
-    decoraciones.append(new Decoracion(34*64, 4*64 + 10, 40, 40,
-                                       TipoDecoracion::SILLA, true));
-    decoraciones.append(new Decoracion(38*64, 4*64 + 10, 40, 40,
-                                       TipoDecoracion::SILLA, true));
-
-    // Estantería en la pared
-    decoraciones.append(new Decoracion(39*64, 2*64 + 10, 50, 55,
+    decoraciones.append(new Decoracion(29*64, 2*64 - 20, 75, 40,
+                                       TipoDecoracion::SOFA, true));
+    decoraciones.append(new Decoracion(39*64-11, 2*64 - 20, 75, 40,
+                                       TipoDecoracion::SOFA, true));
+    decoraciones.append(new Decoracion(37*64-4, 2*64 - 50, 70, 70,
                                        TipoDecoracion::ESTANTERIA, true));
-
-    // Archivador
-    decoraciones.append(new Decoracion(29*64, 5*64, 45, 50,
+    decoraciones.append(new Decoracion(28 * 64, 9 * 64 - 25, 64, 50,
                                        TipoDecoracion::ARCHIVADOR, true));
-
-    // Planta decorativa
-    decoraciones.append(new Decoracion(28*64 + 10, 2*64 + 20, 40, 40,
+    decoraciones.append(new Decoracion(30 * 64 + 20, 2 * 64 - 20, 40, 40,
                                        TipoDecoracion::PLANTA, false));
+    decoraciones.append(new Decoracion(34 * 64 + 11, 1 * 64, 50, 55,
+                                       TipoDecoracion::CUADRO_DECORATIVO, false));
 
     // ============================================
-    // HABITACIÓN 3: SALA DE REUNIONES
+    // HABITACIÓN 4
     // ============================================
 
-    // Mesa de reuniones grande (centro)
-
-
-    // Sillas alrededor de la mesa
-    decoraciones.append(new Decoracion(42*64, 3*64 + 20, 40, 40,
-                                       TipoDecoracion::SILLA, true));
-    decoraciones.append(new Decoracion(42*64, 4*64 + 10, 40, 40,
-                                       TipoDecoracion::SILLA, true));
-    decoraciones.append(new Decoracion(47*64, 3*64 + 20, 40, 40,
-                                       TipoDecoracion::SILLA, true));
-    decoraciones.append(new Decoracion(47*64, 4*64 + 10, 40, 40,
-                                       TipoDecoracion::SILLA, true));
-
-    // Estantería
-    decoraciones.append(new Decoracion(48*64, 5*64, 50, 55,
+    decoraciones.append(new Decoracion(48 * 64 - 4, 2 * 64 - 50, 70, 70,
                                        TipoDecoracion::ESTANTERIA, true));
 
-    // Planta en esquina
-    decoraciones.append(new Decoracion(41*64, 2*64 + 20, 40, 40,
+    decoraciones.append(new Decoracion(38 * 64 + 10, 2 * 64 - 20, 40, 40,
                                        TipoDecoracion::PLANTA, false));
 
-    // Cuadros decorativos en las paredes (NO interactivos)
-    decoraciones.append(new Decoracion(41*64, 1*64 + 20, 40, 35,
+    decoraciones.append(new Decoracion(44 * 64 + 7, 1 * 64, 50, 55,
                                        TipoDecoracion::CUADRO_DECORATIVO, false));
 
 
     qDebug() << "Total decoraciones creadas:" << decoraciones.size();
 }
+
 void Nivel1::verificarInteracciones()
 {
     if (!jugador || jugador->estaMuerto()) return;
 
-    for (ObjetoInteractivo* objeto : objetos)
+    //for (ObjetoInteractivo* objeto : objetos)
+    //{
+    //    if (objeto == puerta) continue;
+    //    // Solo interactuar con objetos activos y no recogidos
+    //    if (!objeto->estaActivo() || objeto->estaRecogido()) continue;
+
+    //    if (objeto->jugadorCerca(jugador))
+    //    {
+    //        objeto->interactuar(jugador);
+
+    //        // Actualizar estado del nivel según el tipo
+    //        if (objeto->getTipo() == TipoObjeto::PLANOS)
+    //        {
+    //            if (objeto == planos1)
+    //            {
+    //                tienePlano1 = true;
+    //                qDebug() << "¡Plano 1 obtenido!";
+    //            }
+    //            else if (objeto == planos2)
+    //            {
+    //                tienePlano2 = true;
+    //                qDebug() << "¡Plano 2 obtenido!";
+    //            }
+    //        }
+    //        else if (objeto->getTipo() == TipoObjeto::LLAVE)
+    //        {
+    //            tieneLlave = true;
+    //            qDebug() << "¡Llave obtenida!";
+    //        }
+
+    //        // Solo recoger un objeto a la vez
+    //        break;
+    //    }
+    //}
+    if (puertaAbierta)//tienePlano1 && tienePlano2 && tieneLlave && !
     {
-        if (!objeto->estaRecogido() && objeto->jugadorCerca(jugador))
-        {
-            // El jugador está cerca del objeto
-            objeto->interactuar(jugador);
-
-            // Actualizar estado del nivel
-            if (objeto->getTipo() == TipoObjeto::PLANOS)
-            {
-                if (objeto == planos1)
-                {
-                    tienePlano1 = true;
-                    qDebug() << "¡Plano 1 obtenido!";
-                } else if (objeto == planos2)
-                {
-                    tienePlano2 = true;
-                    qDebug() << "¡Plano 2 obtenido!";
-                }
-            } else if (objeto->getTipo() == TipoObjeto::LLAVE)
-            {
-                tieneLlave = true;
-                qDebug() << "¡Llave obtenida!";
-            }
-        }
-    }
-
-    // Verificar si puede abrir la puerta
-    if (tienePlano1 && tienePlano2 && tieneLlave && !puertaAbierta) {
-        // El jugador está cerca de la puerta
-        float distPuerta = std::sqrt(
-            std::pow(jugador->getX() - posicionPuerta.x(), 2) +
-            std::pow(jugador->getY() - posicionPuerta.y(), 2)
-            );
-
-        if (distPuerta < 50.0f)
+        if (puerta && puerta->jugadorCerca(jugador))
         {
             abrirPuerta();
         }
@@ -269,14 +246,15 @@ void Nivel1::verificarInteracciones()
 }
 void Nivel1::abrirPuerta()
 {
+    if (puertaAbierta || !puerta) return;
+
     puertaAbierta = true;
+    puerta->abrir();
 
-    // Cambiar el tile de la puerta en el mapa
-    int tileX = (int)posicionPuerta.x() / TAMANO_TILE;
-    int tileY = (int)posicionPuerta.y() / TAMANO_TILE;
-
-    mapa[tileY][tileX] = PISO;  // Abrir la puerta
-    mapa[tileY + 1][tileX] = PISO;
+    // Cambiar tiles del mapa (hacer transitables)
+    int tileX = 41;  // Posición X de la puerta
+    mapa[1][tileX] = PISO;  // Tile superior
+    mapa[2][tileX] = PISO;  // Tile inferior (entrada)
 
     qDebug() << "¡PUERTA ABIERTA! Dirígete a la salida";
 }
@@ -366,12 +344,16 @@ void Nivel1::crearMapa()
     // ==========================================
 
     // Zona de sombra en el pasillo
-    for (int x = 13; x < 27; x++)
+    for (int x = 13; x < 25; x++)
     {
         for (int y = 8; y <= 10; y++)
         {
             mapa[y][x]=SOMBRA;
         }
+    }
+    for (int y = 5; y <= 10; y++)
+    {
+        mapa[y][25] = COLUMNA;
     }
 
     // ==========================================
@@ -443,24 +425,26 @@ void Nivel1::actualizar(float dt)
 
         // Obtener nueva posición
         float newX = jugador->getX();
-        float newY = jugador->getY();
+
+        float hitboxY = jugador->getHitboxY();
+        float hitboxAlto = jugador->getHitboxAlto();
 
         // Verificar colisión en nueva posición
-        bool colisionTotal = hayColision(newX, newY,
+        bool colisionTotal = hayColision(newX, hitboxY,
                                          jugador->getAncho(),
-                                         jugador->getAlto());
+                                         hitboxAlto);
 
         if (colisionTotal)
         {
             // Intentar movimiento solo en X (mantener Y anterior)
-            bool colisionX = hayColision(newX, prevY,
+            bool colisionX = hayColision(newX, (hitboxY - prevY),
                                          jugador->getAncho(),
-                                         jugador->getAlto());
+                                         jugador->getAlto() - hitboxAlto);
 
             // Intentar movimiento solo en Y (mantener X anterior)
-            bool colisionY = hayColision(prevX, newY,
+            bool colisionY = hayColision(prevX, hitboxY,
                                          jugador->getAncho(),
-                                         jugador->getAlto());
+                                         jugador->getAlto() - hitboxAlto);
 
             if (!colisionX && colisionY)
             {
@@ -496,16 +480,24 @@ void Nivel1::actualizar(float dt)
     {
         guardia->actualizar(dt);
     }
+    for (Cuadro* cuadro : cuadros)
+    {
+        cuadro->actualizar(dt);
+    }
+    if (puerta)
+    {
+        puerta->actualizar(dt);
+    }
+
     verificarDetecciones();
     verificarInteracciones();
-    //verificarCaptura();
     actualizarCamara();
 }
 void Nivel1::actualizarCamara()
 {
     if (!jugador) return;
 
-    const float ANCHO_PANTALLA = 1550;
+    const float ANCHO_PANTALLA = 1250;
     const float ANCHO_NIVEL = ANCHO_MAPA * TAMANO_TILE;
 
     // Centrar cámara en el jugador
@@ -541,7 +533,37 @@ void Nivel1::renderizar(QPainter* painter)
     }
     for (ObjetoInteractivo* objeto : objetos)
     {
-        objeto->renderizar(painter);
+        if (objeto->estaActivo() && !objeto->estaRecogido())
+        {
+            objeto->renderizar(painter);
+
+            // ✅ Mostrar indicador [E] si el jugador está cerca
+            if (jugador && objeto->jugadorCerca(jugador))
+            {
+                // Fondo del indicador
+                painter->fillRect(objeto->getX() - 5, objeto->getY() - 25,
+                                  70, 20, QColor(0, 0, 0, 180));
+
+                // Texto
+                painter->setPen(Qt::yellow);
+                painter->setFont(QFont("Arial", 10, QFont::Bold));
+
+                QString textoIndicador = "[E] Tomar";
+                if (objeto->getTipo() == TipoObjeto::PLANOS) {
+                    textoIndicador = "[E] Plano";
+                } else if (objeto->getTipo() == TipoObjeto::LLAVE) {
+                    textoIndicador = "[E] Llave";
+                }
+
+                painter->drawText(objeto->getX(), objeto->getY() - 10, textoIndicador);
+
+                // Brillo
+                painter->setBrush(Qt::NoBrush);
+                painter->setPen(QPen(QColor(255, 255, 0, 150), 2));
+                painter->drawRect(objeto->getX() - 2, objeto->getY() - 2,
+                                  objeto->getAncho() + 4, objeto->getAlto() + 4);
+            }
+        }
     }
 
     for (Guardia* guardia : guardias)
@@ -584,25 +606,114 @@ void Nivel1::renderizar(QPainter* painter)
     }
 }
 
+
 void Nivel1::manejarTecla(QKeyEvent* event, bool pressed)
 {
-    if (jugador)
+    if (!jugador) return;
+
+    if (pressed)
     {
-        if (pressed)
+        if (event->key() == Qt::Key_E)
         {
-            if (event->key() == Qt::Key_E)
+            qDebug() << "=== TECLA E PRESIONADA ===";
+
+            // ============================================
+            // PRIORIDAD 1: CUADROS
+            // ============================================
+            for (Cuadro* cuadro : cuadros)
             {
-                verificarInteracciones();
+                if (cuadro->estaActivo() &&
+                    !cuadro->estaQuitado() &&
+                    cuadro->jugadorCerca(jugador))
+                {
+                    qDebug() << "→ Quitando cuadro";
+                    cuadro->interactuar(jugador);
+                    return;  // ✅ Salir inmediatamente
+                }
             }
-            else
+
+            // ✅ VERIFICAR si hay algún cuadro recién quitado bloqueando
+            bool hayBloqueo = false;
+            for (Cuadro* cuadro : cuadros)
             {
-                jugador->manejarTeclaPresionada(event->key());
+                if (cuadro->bloqueaInteraccionObjeto())
+                {
+                    hayBloqueo = true;
+                    qDebug() << "→ Esperando para recoger objeto...";
+                    break;
+                }
             }
+
+            // Si hay bloqueo, no permitir recoger objetos todavía
+            if (hayBloqueo) {
+                return;
+            }
+
+            // ============================================
+            // PRIORIDAD 2: OBJETOS
+            // ============================================
+            for (ObjetoInteractivo* objeto : objetos)
+            {
+                if (objeto == puerta) continue;
+
+                if (!objeto->estaActivo() || objeto->estaRecogido()) {
+                    continue;
+                }
+
+                if (objeto->jugadorCerca(jugador))
+                {
+                    qDebug() << "→ Recogiendo objeto tipo:" << (int)objeto->getTipo();
+
+                    objeto->interactuar(jugador);
+
+                    if (objeto->getTipo() == TipoObjeto::PLANOS)
+                    {
+                        if (objeto == planos1)
+                        {
+                            tienePlano1 = true;
+                            qDebug() << "✓ ¡Plano 1 recogido!";
+                        }
+                        else if (objeto == planos2)
+                        {
+                            tienePlano2 = true;
+                            qDebug() << "✓ ¡Plano 2 recogido!";
+                        }
+                    }
+                    else if (objeto->getTipo() == TipoObjeto::LLAVE)
+                    {
+                        tieneLlave = true;
+                        qDebug() << "✓ ¡Llave recogida!";
+                    }
+
+                    return;
+                }
+            }
+
+            // ============================================
+            // PRIORIDAD 3: PUERTA
+            // ============================================
+            if (tienePlano1 && tienePlano2 && tieneLlave && !puertaAbierta)
+            {
+                if (puerta && puerta->jugadorCerca(jugador))
+                {
+                    qDebug() << "→ Abriendo puerta";
+                    abrirPuerta();
+                    return;
+                }
+            }
+
+            qDebug() << "→ No hay nada cerca para interactuar";
         }
         else
         {
-            jugador->manejarTeclaSoltada(event->key());
+            // Otras teclas (movimiento, etc.)
+            jugador->manejarTeclaPresionada(event->key());
         }
+    }
+    else
+    {
+        // Tecla soltada
+        jugador->manejarTeclaSoltada(event->key());
     }
 }
 void Nivel1::dibujarMapa(QPainter* painter)
@@ -732,6 +843,25 @@ bool Nivel1::hayColision(float x, float y, float ancho, float alto) const
             }
         }
     }
+    if (!puertaAbierta && puerta)
+    {
+        // Verificar si colisiona con el rectángulo de la puerta
+        float puertaX = puerta->getX();
+        float puertaY = puerta->getY();
+        float puertaAncho = puerta->getAncho();
+        float puertaAlto = puerta->getAlto();
+
+        // Colisión rectangular
+        bool colisionaPuerta = !(x + ancho < puertaX ||
+                                 x > puertaX + puertaAncho ||
+                                 y + alto < puertaY ||
+                                 y > puertaY + puertaAlto);
+
+        if (colisionaPuerta)
+        {
+            return true;  // La puerta cerrada bloquea el paso
+        }
+    }
     for (Decoracion* deco : decoraciones)
     {
         if (deco->colisionaCon(x, y, ancho, alto))
@@ -775,70 +905,93 @@ void Nivel1::crearGuardias()
 {
     qDebug() << "=== CREANDO GUARDIAS ===";
 
-    // GUARDIA 1: Patrulla en la entrada
     QVector<QPointF> ruta1;
-    ruta1.append(QPointF(11 * 64, 9 * 64));
-    ruta1.append(QPointF(8 * 64, 3 * 64));
-    ruta1.append(QPointF(1 * 64, 2 * 64));
-    ruta1.append(QPointF(7 * 64, 5 * 64));
-    ruta1.append(QPointF(1 * 64, 6 * 64));
-    ruta1.append(QPointF(1 * 64, 10 * 64));
-    ruta1.append(QPointF(4 * 64, 7 * 64));
-    ruta1.append(QPointF(6 * 64, 9 * 64));
-    ruta1.append(QPointF(9 * 64, 6 * 64));
+    ruta1.append(QPointF(2 * 64, 3 * 64));
     ruta1.append(QPointF(9 * 64, 3 * 64));
 
-    Guardia* guardia1 = new Guardia(11 * 64, 2 * 64, ruta1);
+    Guardia* guardia1 = new Guardia(9 * 64, 3 * 64, ruta1);
     guardia1->setJugadorObjetivo(jugador);
+    guardia1->setNivel(this);
     guardias.append(guardia1);
 
-    // GUARDIA 2
     QVector<QPointF> ruta2;
-    ruta2.append(QPointF(13 * 64, 7 * 64));
-    ruta2.append(QPointF(16 * 64, 3 * 64));
-    ruta2.append(QPointF(18 * 64, 10 * 64));
-    ruta2.append(QPointF(20 * 64, 4 * 64));
-    ruta2.append(QPointF(23 * 64, 8 * 64));
-    ruta2.append(QPointF(25 * 64, 3 * 64));
-    ruta2.append(QPointF(27 * 64, 8 * 64));
+    ruta2.append(QPointF(10 * 64, 3 * 64));
+    ruta2.append(QPointF(10 * 64, 10 * 64));
 
-    Guardia* guardia2 = new Guardia(27 * 64, 10 * 64, ruta2);
+    Guardia* guardia2 = new Guardia(10 * 64, 10 * 64, ruta2);
     guardia2->setJugadorObjetivo(jugador);
+    guardia2->setNivel(this);
     guardias.append(guardia2);
 
-    // GUARDIA 3
     QVector<QPointF> ruta3;
-    ruta3.append(QPointF(30 * 64, 6 * 64));
-    ruta3.append(QPointF(31 * 64, 8 * 64));
-    ruta3.append(QPointF(33 * 64, 3 * 64));
-    ruta3.append(QPointF(35 * 64, 10 * 64));
-    ruta3.append(QPointF(37 * 64, 2 * 64));
-    ruta3.append(QPointF(39 * 64, 5 * 64));
+    ruta3.append(QPointF(14 * 64, 10 * 64));
+    ruta3.append(QPointF(14 * 64, 3 * 64));
 
-    Guardia* guardia3 = new Guardia(39 * 64, 4 * 64, ruta3);
+    Guardia* guardia3 = new Guardia(14 * 64, 3 * 64, ruta3);
     guardia3->setJugadorObjetivo(jugador);
+    guardia3->setNivel(this);
     guardias.append(guardia3);
 
-    // GUARDIA 4
     QVector<QPointF> ruta4;
-    ruta4.append(QPointF(42 * 64, 9 * 64));
-    ruta4.append(QPointF(48 * 64, 10 * 64));
-    ruta4.append(QPointF(48 * 64, 2 * 64));
-    ruta4.append(QPointF(41 * 64, 2 * 64));
+    ruta4.append(QPointF(26 * 64, 3 * 64));
+    ruta4.append(QPointF(14 * 64, 3 * 64));
 
-    Guardia* guardia4 = new Guardia(42 * 64, 6 * 64, ruta4);
+    Guardia* guardia4 = new Guardia(14 * 64, 3 * 64, ruta4);
     guardia4->setJugadorObjetivo(jugador);
+    guardia4->setNivel(this);
     guardias.append(guardia4);
 
     QVector<QPointF> ruta5;
-    ruta5.append(QPointF(45 * 64, 5 * 64));
-    ruta5.append(QPointF(39 * 64, 5 * 64));
-    ruta5.append(QPointF(45 * 64, 5 * 64));
-    ruta5.append(QPointF(45 * 64, 10 * 64));
+    ruta5.append(QPointF(23 * 64, 3 * 64));
+    ruta5.append(QPointF(23 * 64, 10 * 64));
 
-    Guardia* guardia5 = new Guardia(45 * 64, 7 * 64, ruta5);
+    Guardia* guardia5 = new Guardia(23 * 64, 10 * 64, ruta5);
     guardia5->setJugadorObjetivo(jugador);
+    guardia5->setNivel(this);
     guardias.append(guardia5);
+
+    QVector<QPointF> ruta6;
+    ruta6.append(QPointF(38 * 64, 10 * 64));
+    ruta6.append(QPointF(27 * 64, 10 * 64));
+
+    Guardia* guardia6 = new Guardia(27 * 64, 10 * 64, ruta6);
+    guardia6->setJugadorObjetivo(jugador);
+    guardia6->setNivel(this);
+    guardias.append(guardia6);
+
+    QVector<QPointF> ruta7;
+    ruta7.append(QPointF(30 * 64, 3 * 64));
+    ruta7.append(QPointF(35 * 64, 3 * 64));
+    ruta7.append(QPointF(30 * 64, 3 * 64));
+    ruta7.append(QPointF(30 * 64, 8 * 64));
+
+
+    Guardia* guardia7 = new Guardia(30 * 64, 8 * 64, ruta7);
+    guardia7->setJugadorObjetivo(jugador);
+    guardia7->setNivel(this);
+    guardias.append(guardia7);
+
+    QVector<QPointF> ruta8;
+    ruta8.append(QPointF(37 * 64, 5 * 64));
+    ruta8.append(QPointF(45 * 64, 5 * 64));
+
+    Guardia* guardia8 = new Guardia(45 * 64, 5 * 64, ruta8);
+    guardia8->setJugadorObjetivo(jugador);
+    guardia8->setNivel(this);
+    guardias.append(guardia8);
+
+    QVector<QPointF> ruta9;
+    ruta9.append(QPointF(47 * 64 + 20, 2 * 64));
+    ruta9.append(QPointF(42 * 64, 2 * 64));
+    ruta9.append(QPointF(47 * 64 + 20, 2 * 64));
+    ruta9.append(QPointF(47 * 64 + 20, 10 * 64));
+
+
+    Guardia* guardia9 = new Guardia(47 * 64 + 20, 10 * 64, ruta9);
+    guardia9->setJugadorObjetivo(jugador);
+    guardia9->setNivel(this);
+    guardias.append(guardia9);
+
 
     qDebug() << "Total guardias creados:" << guardias.size();
 }

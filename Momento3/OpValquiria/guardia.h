@@ -7,6 +7,7 @@
 #include <QPixmap>
 
 class Jugador;
+class Nivel1;
 
 enum class DireccionGuardia
 {
@@ -40,12 +41,13 @@ private:
     QVector<QPointF> zonasDeteccion;  // Lugares donde detectó al jugador
 
     // Velocidades
-    static constexpr float VEL_PATRULLA = 50.0f;
-    static constexpr float VEL_INVESTIGAR = 90.0f;
-    static constexpr float VEL_PERSEGUIR = 190.0f;
+    static constexpr float VEL_PATRULLA = 30.0f;
+    static constexpr float VEL_INVESTIGAR = 80.0f;
+    static constexpr float VEL_PERSEGUIR = 110.0f;
 
     // Referencia al jugador (para detectarlo)
     Jugador* jugadorObjetivo;
+    Nivel1* nivelRef;
 
     // Sprites
     QVector<QVector<QPixmap>> sprites;  // sprites[direccion][frame]
@@ -54,7 +56,6 @@ private:
     float tiempoAnimacion;
     static const int FRAMES_LATERAL = 2;
     static const int FRAMES_VERTICAL = 3;
-
 
 public:
     Guardia(float x, float y, const QVector<QPointF>& ruta);
@@ -76,6 +77,9 @@ public:
     void perseguir(float dt);
     void buscar(float dt);
     void actualizarDireccionVista(float dx, float dy);
+    void setNivel(Nivel1* nivel) { nivelRef = nivel; }
+    void intentarRodearObstaculo(QPointF objetivo, float dt);
+    int contarParedesEnLinea(QPointF desde, QPointF hasta);
 
     // Detección
     bool detectarJugador();
@@ -98,6 +102,11 @@ private:
     bool estaEnCampoVision(float anguloAJugador) const;
     void moverHaciaPunto(QPointF objetivo, float velocidad, float dt);
     void actualizarDireccionSprite(float dx, float dy);
+    bool verificarColision(float newX, float newY);
+    bool hayLineaDeVista(QPointF desde, QPointF hasta);
+    bool intentandoRodear;
+    QPointF puntoRodeo;
+    float tiempoAtascado;
 };
 
 #endif // GUARDIA_H

@@ -42,7 +42,8 @@ void Planos::renderizar(QPainter* painter)
 
 void Planos::interactuar(Jugador* jugador)
 {
-    if (!recogido && activo) {
+    if (!recogido && activo)
+    {
         recogido = true;
         qDebug() << "¡Planos recogidos!";
     }

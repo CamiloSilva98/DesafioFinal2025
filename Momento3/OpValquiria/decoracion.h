@@ -6,14 +6,15 @@
 
 enum class TipoDecoracion {
     ESCRITORIO,
-    SILLA,
+    SOFA,
     ESTANTERIA,
     PLANTA,
     ARCHIVADOR,
     MESA,
-    LAMPARA_PIE,
-    MACETA,
-    CUADRO_DECORATIVO  // Cuadros que solo decoran (no interactivos)
+    CABALLETE,
+    COFRE,
+    CUADRO_DECORATIVO,
+    MESAL
 };
 
 class Decoracion
