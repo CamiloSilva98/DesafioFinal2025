@@ -64,5 +64,7 @@
     <qresource prefix="/sound">
         <file>sounds/alarm-1-with-reverberation-30031.mp3</file>
         <file>sounds/freeze-2-86991.mp3</file>
+        <file>sounds/click_ok.mp3</file>
+        <file>sounds/gun-shot-1-176892.mp3</file>
     </qresource>
 </RCC>

@@ -4,6 +4,9 @@
 #include "nivel.h"
 #include <QPainter>
 #include <QVector>
+#include <QMediaPlayer>
+#include <QAudioOutput>
+#include <QTimer>
 
 
 class Jugador;
@@ -57,6 +60,16 @@ private:
     float tiempoEsperaDerrota;
     const float DELAY_DERROTA = 2.0f;
 
+    QMediaPlayer* reproductorAlarma;
+    QMediaPlayer* reproductorDisparo;
+    QMediaPlayer* reproductorGuardia;
+    QAudioOutput* audioOutputAlarma;
+    QAudioOutput* audioOutputDisparo;
+    QAudioOutput* audioOutputGuardia;
+
+
+    bool alarmaReproducida;
+
     void crearMapa();
     void dibujarMapa(QPainter* painter);
     void actualizarCamara();
@@ -68,6 +81,11 @@ private:
     void abrirPuerta();
     void crearDecoraciones();
     void crearCuadros();
+
+    void inicializarSonidos();
+    void reproducirSonidoDisparo();
+    void reproducirSonidoAlarma();
+    void reproducirSonidoGuardia();
 
 public:
     Nivel1();

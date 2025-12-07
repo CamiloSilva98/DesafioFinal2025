@@ -10,6 +10,8 @@
 #include "llave.h"
 #include "puerta.h"
 #include <QKeyEvent>
+#include <QUrl>
+
 
 enum TipoTile
 {
@@ -34,7 +36,13 @@ Nivel1::Nivel1()
     puertaAbierta(false),
     detecciones(0),
     esperandoDerrota(false),
-    tiempoEsperaDerrota(0.0f)
+    tiempoEsperaDerrota(0.0f),
+    reproductorAlarma(nullptr),
+    reproductorDisparo(nullptr),
+    reproductorGuardia(nullptr),
+    audioOutputAlarma(nullptr),
+    audioOutputDisparo(nullptr),
+    audioOutputGuardia(nullptr)
 {
     posicionPuerta = QPointF(41 * 64, 1 * 64);
     posicionSalida = QPointF(41 * 64, 10);
@@ -69,6 +77,13 @@ Nivel1::~Nivel1()
         delete deco;
     }
     decoraciones.clear();
+
+    if (reproductorAlarma) delete reproductorAlarma;
+    if (reproductorDisparo) delete reproductorDisparo;
+    if (reproductorGuardia) delete reproductorGuardia;
+    if (audioOutputAlarma) delete audioOutputAlarma;
+    if (audioOutputDisparo) delete audioOutputDisparo;
+    if (audioOutputGuardia) delete audioOutputGuardia;
 }
 
 void Nivel1::inicializar()
@@ -76,6 +91,7 @@ void Nivel1::inicializar()
     qDebug() << "Inicializando Nivel 1...";
 
     cargarSprites();
+    qDebug() << "Sonidos!";
     crearMapa();
     qDebug() << "Mapa creado!";
 
@@ -85,6 +101,8 @@ void Nivel1::inicializar()
     crearGuardias();
     crearObjetos();
     crearDecoraciones();
+
+    inicializarSonidos();
 
     detecciones = 0;
     qDebug() << "Jugador creado!";
@@ -97,7 +115,86 @@ void Nivel1::inicializar()
     completado = false;
     esperandoDerrota = false;
     tiempoEsperaDerrota = 0.0f;
+    alarmaReproducida = false;
 }
+
+void Nivel1::inicializarSonidos()
+{
+    qDebug() << "=== INICIALIZANDO SONIDOS ===";
+
+    // ✅ SONIDO 1: Disparo
+    reproductorDisparo = new QMediaPlayer();
+    audioOutputDisparo = new QAudioOutput();
+    reproductorDisparo->setAudioOutput(audioOutputDisparo);
+    reproductorDisparo->setSource(QUrl("qrc:/sound/sounds/gun-shot-1-176892.mp3"));
+    audioOutputDisparo->setVolume(0.7f);
+
+    if (reproductorDisparo->error() != QMediaPlayer::NoError) {
+        qDebug() << "Error cargando disparo:" << reproductorDisparo->errorString();
+    } else {
+        qDebug() << "✓ Disparo cargado";
+    }
+
+    // ✅ SONIDO 2: Alarma
+    reproductorAlarma = new QMediaPlayer();
+    audioOutputAlarma = new QAudioOutput();
+    reproductorAlarma->setAudioOutput(audioOutputAlarma);
+    reproductorAlarma->setSource(QUrl("qrc:/sound/sounds/alarm-1-with-reverberation-30031.mp3"));
+    audioOutputAlarma->setVolume(0.8f);
+
+    if (reproductorAlarma->error() != QMediaPlayer::NoError) {
+        qDebug() << "Error cargando alarma:" << reproductorAlarma->errorString();
+    } else {
+        qDebug() << "✓ Alarma cargada";
+    }
+
+    // ✅ SONIDO 3: Guardia
+    reproductorGuardia = new QMediaPlayer();
+    audioOutputGuardia = new QAudioOutput();
+    reproductorGuardia->setAudioOutput(audioOutputGuardia);
+    reproductorGuardia->setSource(QUrl("qrc:/sound/sounds/freeze-2-86991.mp3"));
+    audioOutputGuardia->setVolume(0.6f);
+
+    if (reproductorGuardia->error() != QMediaPlayer::NoError) {
+        qDebug() << "Error cargando guardia:" << reproductorGuardia->errorString();
+    } else {
+        qDebug() << "✓ Guardia cargado";
+    }
+
+    qDebug() << "=== SONIDOS INICIALIZADOS ===";
+}
+void Nivel1::reproducirSonidoDisparo()
+{
+    if (reproductorDisparo) {
+        reproductorDisparo->stop();  // Detener si está sonando
+        reproductorDisparo->setPosition(0);  // Volver al inicio
+        reproductorDisparo->play();
+        qDebug() << "🔫 Reproduciendo sonido de DISPARO";
+    }
+}
+
+void Nivel1::reproducirSonidoAlarma()
+{
+    if (reproductorAlarma) {
+        reproductorAlarma->stop();
+        reproductorAlarma->setPosition(0);
+        reproductorAlarma->play();
+        qDebug() << "🚨 Reproduciendo sonido de ALARMA";
+    }
+}
+
+void Nivel1::reproducirSonidoGuardia()
+{
+    if (reproductorGuardia) {
+        // Solo reproducir si no está ya sonando
+        if (reproductorGuardia->playbackState() != QMediaPlayer::PlayingState) {
+            reproductorGuardia->setPosition(0);
+            reproductorGuardia->play();
+            qDebug() << "👮 Reproduciendo sonido de GUARDIA";
+        }
+    }
+}
+
 void Nivel1::crearObjetos()
 {
     qDebug() << "=== CREANDO OBJETOS ===";
@@ -283,6 +380,7 @@ void Nivel1::cargarSprites()
 
     qDebug() << "=== FIN CARGA SPRITES ===";
 }
+
 void Nivel1::crearMapa()
 {
     // Inicializar todo como VACIO
@@ -933,7 +1031,7 @@ void Nivel1::crearGuardias()
     ruta1.append(QPointF(2 * 64, 3 * 64));
     ruta1.append(QPointF(9 * 64, 3 * 64));
 
-    Guardia* guardia1 = new Guardia(9 * 64, 3 * 64, ruta1);
+    Guardia* guardia1 = new Guardia(9 * 64, 4 * 64, ruta1);
     guardia1->setJugadorObjetivo(jugador);
     guardia1->setNivel(this);
     guardias.append(guardia1);
@@ -960,7 +1058,7 @@ void Nivel1::crearGuardias()
     ruta4.append(QPointF(26 * 64, 3 * 64));
     ruta4.append(QPointF(14 * 64, 3 * 64));
 
-    Guardia* guardia4 = new Guardia(14 * 64, 3 * 64, ruta4);
+    Guardia* guardia4 = new Guardia(26 * 64, 3 * 64, ruta4);
     guardia4->setJugadorObjetivo(jugador);
     guardia4->setNivel(this);
     guardias.append(guardia4);
@@ -1019,7 +1117,6 @@ void Nivel1::crearGuardias()
 
     qDebug() << "Total guardias creados:" << guardias.size();
 }
-
 void Nivel1::verificarDetecciones()
 {
     for (Guardia* guardia : guardias)
@@ -1042,6 +1139,17 @@ void Nivel1::verificarDetecciones()
                     detecciones++;
                     ultimoFrameDeteccion = frameActual;
                     qDebug() << "¡DETECTADO! Total detecciones:" << detecciones;
+                    reproducirSonidoGuardia();
+                    if (detecciones >= MAX_DETECCIONES)
+                    {
+                        reproducirSonidoDisparo();
+                        QTimer::singleShot(500, [this]() {
+                            if (jugador) {
+                                jugador->morir();
+                                reproducirSonidoAlarma();
+                            }
+                        });
+                    }
                 }
             }
         }
