@@ -98,7 +98,7 @@ void Nivel1::inicializar()
     jugador = new Jugador(80, 320);
     qDebug() << "Jugador creado!";
 
-    //crearGuardias();
+    crearGuardias();
     crearObjetos();
     crearDecoraciones();
 

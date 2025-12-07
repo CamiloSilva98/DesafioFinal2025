@@ -336,7 +336,7 @@ void Guardia::renderizar(QPainter* painter)
 
     // Dibujar sprite o fallback
     if (!spriteActual.isNull()) {
-        // ⭐ DIBUJAR EL SPRITE
+        // DIBUJAR EL SPRITE
         painter->drawPixmap(x, y, ancho, alto, spriteActual);
 
         // Agregar tinte según estado (opcional)
@@ -368,36 +368,8 @@ void Guardia::renderizar(QPainter* painter)
         painter->drawRect(x, y, ancho, alto);
     }
 
-    // Dibujar campo de visión, borrar
-    painter->save();
-    painter->translate(x + ancho/2, y + alto/2);
-    painter->rotate(direccionVista);
-
-    QPainterPath camino;
-    camino.moveTo(0, 0);
-    camino.arcTo(-rangoVision, -rangoVision,
-                 rangoVision*2, rangoVision*2,
-                 -campoVision/2, campoVision);
-    camino.lineTo(0, 0);
-
-    painter->setBrush(QColor(255, 255, 0, 30));
-    painter->setPen(QPen(QColor(255, 255, 0, 100), 1));
-    painter->drawPath(camino);
 
     painter->restore();
-
-
-
-    // Indicador de estado
-    painter->setPen(Qt::white);
-    painter->setFont(QFont("Arial", 8));
-
-
-    // Debug: mostrar frame actual
-    painter->setPen(Qt::yellow);
-    painter->drawText(x, y - 15, QString("F:%1 D:%2")
-                                     .arg(frameActual)
-                                     .arg(static_cast<int>(direccionActual)));
 }
 
 // ============================================

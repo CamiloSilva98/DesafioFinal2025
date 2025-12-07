@@ -80,15 +80,15 @@ void Juego::cargarSiguienteNivel()
 
     if (siguienteNivel > 3)
     {
-        // ✅ Ya completó todos los niveles - Victoria final
-        qDebug() << "🎉 ¡JUEGO COMPLETADO! Todos los niveles superados";
+        // Ya completó todos los niveles - Victoria final
+        qDebug() << " ¡JUEGO COMPLETADO! Todos los niveles superados";
         estadoJuego = Estado::VICTORIA;
         timer->stop();
     }
     else
     {
-        // ✅ Cargar siguiente nivel
-        qDebug() << "⏭️ Cargando nivel" << siguienteNivel << "...";
+        // Cargar siguiente nivel
+        qDebug() << "️ Cargando nivel" << siguienteNivel << "...";
         cambiarNivel(siguienteNivel);
         estadoJuego = Estado::JUGANDO;
     }
