@@ -13,7 +13,8 @@ Juego::Juego(QWidget* parent)
     nivelActual(nullptr),
     puntuacion(0),
     vidas(3),
-    estadoJuego(Estado::MENU)
+    estadoJuego(Estado::MENU),
+    nivelActualNumero(0)
 {
     // Configurar el timer del juego (60 FPS = ~16ms)
     timer = new QTimer(this);
@@ -39,11 +40,6 @@ void Juego::iniciar()
     vidas = 3;
     // Iniciar el nivel 1 (lo implementarán después)
     cambiarNivel(1);
-
-    //cambiarNivel(1); // Iniciar el nivel 1
-    //timer->start(16); // ~60 FPS // Iniciar el loop del juego
-
-    // Iniciar directamente el nivel 2
     timer->start(16);
 }
 
@@ -54,6 +50,8 @@ void Juego::cambiarNivel(int nivel)
         delete nivelActual;
         nivelActual = nullptr;
     }
+
+     nivelActualNumero = nivel;
 
     // TODO: crear niveles según el número
     switch(nivel)
@@ -71,6 +69,26 @@ void Juego::cambiarNivel(int nivel)
             nivelActual = new Nivel3();
             nivelActual->inicializar();
             break;
+    }
+}
+
+void Juego::cargarSiguienteNivel()
+{
+    int siguienteNivel = nivelActualNumero + 1;
+
+    if (siguienteNivel > 3)
+    {
+        // ✅ Ya completó todos los niveles - Victoria final
+        qDebug() << "🎉 ¡JUEGO COMPLETADO! Todos los niveles superados";
+        estadoJuego = Estado::VICTORIA;
+        timer->stop();
+    }
+    else
+    {
+        // ✅ Cargar siguiente nivel
+        qDebug() << "⏭️ Cargando nivel" << siguienteNivel << "...";
+        cambiarNivel(siguienteNivel);
+        estadoJuego = Estado::JUGANDO;
     }
 }
 

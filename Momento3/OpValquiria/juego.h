@@ -24,6 +24,7 @@ private:
     int vidas;
     Estado estadoJuego;
     QTimer* timer;
+    int nivelActualNumero;
 
     // Métodos privados para dibujar
     void dibujarMenu(QPainter& painter);
@@ -31,6 +32,7 @@ private:
     void dibujarPausa(QPainter& painter);
     void dibujarVictoria(QPainter& painter);
     void dibujarDerrota(QPainter& painter);
+    void cargarSiguienteNivel();
 
 public:
     Juego(QWidget* parent = nullptr);
