@@ -33,10 +33,15 @@ private:
     float limiteArriba;
     float limiteAbajo;
 
+    // Control de movimiento (NUEVO)
+    bool moviendoArriba;
+    bool moviendoAbajo;
+
     // Constantes
     static constexpr float VEL_BASE = 100.0f;
     static constexpr float VEL_TURBO = 200.0f;
     static constexpr float VEL_VERTICAL = 150.0f;
+
 
 public:
     Avion(float x, float y);
@@ -52,6 +57,10 @@ public:
     void frenar();
     void evasion();
     void activarTurbo();
+
+    // Setters para control de movimiento (NUEVO)
+    void setMoverArriba(bool val) { moviendoArriba = val; }
+    void setMoverAbajo(bool val) { moviendoAbajo = val; }
 
     // Física
     void aplicarOscilacion(float dt);

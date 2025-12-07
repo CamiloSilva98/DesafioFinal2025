@@ -41,6 +41,10 @@ private:
     float tiempoGeneracionMisil;
     int misilesEsquivados;
 
+    // NUEVO: control de movimiento continuo del avión
+    bool moviendoArribaAvion;
+    bool moviendoAbajoAvion;
+
     // Gráficos
     QPixmap fondoCielo;
     QPixmap fondoPista;

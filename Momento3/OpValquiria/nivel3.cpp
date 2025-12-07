@@ -43,13 +43,30 @@ void Nivel3::inicializar()
 {
     qDebug() << "Inicializando Nivel 3...";
 
+    // Limpiar si se reinicia
+    if (jugador) { delete jugador; jugador = nullptr; }
+    if (avion)   { delete avion;   avion   = nullptr; }
+
+    qDeleteAll(obstaculosTerrestre);
+    obstaculosTerrestre.clear();
+
+    qDeleteAll(obstaculosAereos);
+    obstaculosAereos.clear();
+
+    qDeleteAll(misiles);
+    misiles.clear();
+
     // FASE 1: Escape terrestre
-    jugador = new Jugador(100, 400);
+    jugador = new Jugador(300, 400);  // Un poco más centrado
     generarObstaculosTerrestre();
 
     faseActual = Fase::TERRESTRE;
     tiempoFase = 0.0f;
+    scrollX = 0.0f;
     completado = false;
+    choques = 0;
+    enSalto = false;
+    velocidadSaltoY = 0.0f;
 
     qDebug() << "Nivel 3 inicializado - FASE TERRESTRE";
 }
@@ -69,23 +86,29 @@ void Nivel3::actualizarFaseTerrestre(float dt)
 {
     if (!jugador) return;
 
-    // Actualizar jugador
+    // Actualizar animación / estado interno del jugador (como en Nivel 1)
     jugador->actualizar(dt);
 
-    // Movimiento automático hacia la derecha
+    // Movimiento automático del jugador hacia la derecha
     float velocidad = velocidadBase;
     if (jugador->estaCorriendo()) {
-        velocidad = 150.0f;
+        velocidad = 150.0f;   // si tu Jugador pone estaCorriendo() al presionar algo
     }
 
-    scrollX += velocidad * dt;
+    // Avanzar al jugador en el mundo
+    float nuevaX = jugador->getX() + velocidad * dt;
+    jugador->setX(nuevaX);
+
+    // La cámara sigue al jugador
+    scrollX = jugador->getX();
 
     // Gravedad y salto
     if (enSalto) {
         aplicarGravedad(dt);
     }
 
-    // Actualizar obstáculos
+    // Actualizar obstáculos (para debug o animaciones; si no quieres que se muevan solos,
+    // pon velocidadScroll = 0 en su constructor)
     for (Obstaculo* obs : obstaculosTerrestre) {
         obs->actualizar(dt);
     }
@@ -93,10 +116,11 @@ void Nivel3::actualizarFaseTerrestre(float dt)
     // Verificar colisiones
     verificarColisionesTerrestre();
 
-    // Verificar si llegó al final (avión)
+    // Verificar si llegó al final (punto donde estaría el avión)
     if (scrollX >= ANCHO_NIVEL - 500) {
-        qDebug() << "¡Llegó al avión! Cambiando a FASE AÉREA";
-        cambiarFase();
+        qDebug() << "Fin de la fase terrestre (llegaría al avión aquí).";
+        // Más adelante aquí llamaremos a cambiarFase() para el avión
+        completado = true; // Por ahora puedes marcarlo como completado
     }
 }
 
@@ -162,7 +186,9 @@ void Nivel3::renderizarFaseTerrestre(QPainter* painter)
     painter->fillRect(0, 500, 1280, 220, QColor(100, 100, 100)); // Pista
 
     painter->save();
-    painter->translate(-scrollX + 100, 0);
+
+    // Cámara: centramos al jugador alrededor de x = 300 en pantalla
+    painter->translate(-scrollX + 300, 0);
 
     // Obstáculos
     for (Obstaculo* obs : obstaculosTerrestre) {
@@ -241,12 +267,12 @@ void Nivel3::cambiarFase()
 
 void Nivel3::generarObstaculosTerrestre()
 {
-    // Generar vallas y barreras distribuidas
+    // Generar vallas y barreras distribuidas a lo largo del nivel
     for (int i = 500; i < ANCHO_NIVEL; i += 300) {
         if (i % 600 == 0) {
-            obstaculosTerrestre.append(new Obstaculo(i, 450, TipoObstaculo::VALLA));
+            obstaculosTerrestre.append(new Obstaculo(i, 450, TipoObstaculo::VALLA, 0.0f));
         } else {
-            obstaculosTerrestre.append(new Obstaculo(i, 480, TipoObstaculo::BARRERA_BAJA));
+            obstaculosTerrestre.append(new Obstaculo(i, 480, TipoObstaculo::BARRERA_BAJA, 0.0f));
         }
     }
 
@@ -310,18 +336,69 @@ void Nivel3::manejarSalto()
 
 void Nivel3::verificarColisionesTerrestre()
 {
-    // TODO: Implementar colisiones con obstáculos
+    if (!jugador) return;
+
+    // Rectángulo del jugador (usamos su bounding box completa por ahora)
+    QRectF rectJugador(jugador->getX(), jugador->getY(),
+                       jugador->getAncho(), jugador->getAlto());
+
+    for (Obstaculo* obs : obstaculosTerrestre)
+    {
+        if (!obs || !obs->estaActivo() || !obs->esSolido()) continue;
+
+        QRectF rectObs(obs->getX(), obs->getY(),
+                       obs->getAncho(), obs->getAlto());
+
+        if (rectJugador.intersects(rectObs))
+        {
+            // Dependiendo del tipo, debería reaccionar distinto,
+            // pero por ahora cualquier golpe cuenta como choque.
+            choques++;
+            qDebug() << "Choque terrestre. Total choques:" << choques;
+
+            // Pequeño retroceso del jugador para que no se quede pegado
+            jugador->setX(jugador->getX() - 50);
+        }
+    }
 }
 
 void Nivel3::verificarColisionesAereas()
 {
     if (!avion) return;
 
+    QRectF rectAvion(avion->getX(), avion->getY(),
+                     avion->getAncho(), avion->getAlto());
+
     // Colisiones con misiles
-    for (Misil* misil : misiles) {
-        if (avion->colisionaCon(misil)) {
-            qDebug() << "¡Impacto de misil!";
-            // TODO: Implementar game over
+    for (Misil* misil : misiles)
+    {
+        if (!misil || !misil->estaActivo()) continue;
+
+        QRectF rectMisil(misil->getX(), misil->getY(),
+                         misil->getAncho(), misil->getAlto());
+
+        if (rectAvion.intersects(rectMisil))
+        {
+            qDebug() << "¡Impacto de misil en el avión!";
+            choques++;
+            misil->setActivo(false);
+        }
+    }
+
+    // Colisiones con obstáculos aéreos sólidos
+    for (Obstaculo* obs : obstaculosAereos)
+    {
+        if (!obs || !obs->estaActivo() || !obs->esSolido()) continue;
+
+        QRectF rectObs(obs->getX(), obs->getY(),
+                       obs->getAncho(), obs->getAlto());
+
+        if (rectAvion.intersects(rectObs))
+        {
+            qDebug() << "Colisión con obstáculo aéreo";
+            choques++;
+            // Puedes desactivar el obstáculo para no chocar mil veces
+            // obs->setActivo(false);
         }
     }
 }
@@ -352,23 +429,41 @@ bool Nivel3::verificarCondicionDerrota()
 
 void Nivel3::manejarTecla(QKeyEvent* event, bool pressed)
 {
-    if (pressed) {
-        if (faseActual == Fase::TERRESTRE)
-        {
+    if (faseActual == Fase::TERRESTRE)
+    {
+        if (pressed) {
             if (event->key() == Qt::Key_Space)
             {
                 manejarSalto();
-            } else if (jugador) {
+            }
+            else if (jugador) {
                 jugador->manejarTeclaPresionada(event->key());
             }
-        } else if (faseActual == Fase::AEREO && avion)
+        } else {
+            if (jugador) {
+                jugador->manejarTeclaSoltada(event->key());
+            }
+        }
+    }
+    else if (faseActual == Fase::AEREO && avion)
+    {
+        // Por ahora, movimiento discreto cuando se pulsa la tecla.
+        // Si luego quieres movimiento suave, lo hacemos.
+        float dtControl = 0.016f; // ~1 frame
+
+        if (pressed)
         {
-            // Controles del avión
-            // TODO: Implementar controles
+            if (event->key() == Qt::Key_Up || event->key() == Qt::Key_W) {
+                avion->moverArriba(dtControl);
+            } else if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {
+                avion->moverAbajo(dtControl);
+            } else if (event->key() == Qt::Key_Shift) {
+                avion->activarTurbo();
+            }
+            // Si quieres que acelerar/frenar funcionen:
+            // else if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) { avion->acelerar(); }
+            // else if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) { avion->frenar(); }
         }
-    } else {
-        if (jugador) {
-            jugador->manejarTeclaSoltada(event->key());
-        }
+        // No hacemos nada en key release para la fase aérea de momento
     }
 }
