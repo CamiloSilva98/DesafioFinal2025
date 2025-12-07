@@ -1,24 +1,27 @@
-// nivel2.h
 #ifndef NIVEL2_H
 #define NIVEL2_H
 
 #include "nivel.h"
 #include "pieza.h"
 #include "maletin.h"
-#include <QSoundEffect>
+
 #include <vector>
+#include <QPixmap>
 
 class Nivel2 : public Nivel {
 public:
-
     std::vector<Pieza*> piezas;
-    Maletin* maletin;
-    int tiempoRestante;
-    int errores;
-    int pasoActual;  // 0=detonador, 1=carga, 2=temporizador
+    Maletin*            maletin;
 
+    int  tiempoRestante;
+    int  errores;
+    int  pasoActual;      // 0 = detonador, 1 = carga, 2 = temporizador
     Pieza* piezaSeleccionada;
-    bool mousePresionado;
+    bool   mousePresionado;
+
+    QPixmap libroSprite;
+    QPixmap fondoSprite;
+    bool    mostrarLibro;
 
     Nivel2();
     ~Nivel2() override;
@@ -33,9 +36,10 @@ public:
     void manejarMouseMove(const QPointF& pos);
     void manejarMouseRelease(const QPointF& pos);
 
+    void alternarLibro();
+
 private:
-    QSoundEffect sonidoCorrecto;
-    QSoundEffect sonidoError;
+    void dibujarLibro(QPainter* painter);
 };
 
-#endif
+#endif // NIVEL2_H

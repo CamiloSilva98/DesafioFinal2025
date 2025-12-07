@@ -60,6 +60,21 @@
         <file>sprites/Puerta2.png</file>
         <file>sprites/Puerta3.png</file>
         <file>sprites/Puerta4.png</file>
+        <file>sprites/detonador.png</file>
+        <file>sprites/explosivo.png</file>
+        <file>sprites/random1.png</file>
+        <file>sprites/random2.png</file>
+        <file>sprites/random3.png</file>
+        <file>sprites/random4.png</file>
+        <file>sprites/random5.png</file>
+        <file>sprites/random6.png</file>
+        <file>sprites/random7.png</file>
+        <file>sprites/random8.png</file>
+        <file>sprites/random9.png</file>
+        <file>sprites/temporizador.png</file>
+        <file>sprites/maletin.png</file>
+        <file>sprites/carta.png</file>
+        <file>sprites/fondo2.jpeg</file>
     </qresource>
     <qresource prefix="/sound">
         <file>sounds/alarm-1-with-reverberation-30031.mp3</file>
