@@ -32,7 +32,6 @@ SOURCES += \
     obstaculo.cpp \
     planos.cpp \
     puerta.cpp\
-    origin/main
 
 HEADERS += \
     agenteinteligente.h \

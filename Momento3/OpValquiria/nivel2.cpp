@@ -17,13 +17,13 @@ Nivel2::Nivel2()
     mostrarLibro(false)
 {
     // Cargar sprite del libro (opcional)
-    libroSprite.load(":/img/sprites/libro.png");
+    libroSprite.load(":/sprites/sprites/carta.png");
     if (libroSprite.isNull()) {
-        qDebug() << "ADVERTENCIA: No se pudo cargar sprite del libro";
+        qDebug() << "ADVERTENCIA: No se pudo cargar sprite de la carta";
     }
 
     // Cargar sprite del fondo
-    fondoSprite.load(":/img/sprites/fondo_mesa.png");
+    fondoSprite.load(":/sprites/sprites/fondo2.jpeg");
     if (fondoSprite.isNull()) {
         qDebug() << "ADVERTENCIA: No se pudo cargar sprite del fondo";
     }
@@ -319,67 +319,76 @@ void Nivel2::alternarLibro() {
     mostrarLibro = !mostrarLibro;
 }
 
-void Nivel2::dibujarLibro(QPainter* painter) {
+void Nivel2::dibujarLibro(QPainter* painter)
+{
     painter->save();
 
-    // Oscurecer el juego detrás
-    painter->fillRect(0, 0, 1600, 900, QColor(0, 0, 0, 190));
+    // 1) Oscurecer el juego detrás
+    painter->fillRect(0, 0, 1600, 900, QColor(0, 0, 0, 200));
 
-    // Colores en armonía con el fondo/maletín
-    QColor coverColor(70, 90, 70);     // tapa del libro, tono militar
-    QColor pageColor (230, 225, 210);  // páginas, claro
-    QColor frameColor(0, 0, 0);        // contorno negro elegante
-
-    QRectF libroRect(260.0, 120.0, 1080.0, 640.0);
-
-    // Marco exterior del libro
-    painter->setBrush(coverColor);
-    painter->setPen(QPen(frameColor, 5));
-    painter->drawRoundedRect(libroRect, 18, 18);
-
-    // "Páginas" internas
-    QRectF pageRect = libroRect.adjusted(18, 18, -18, -18);
-    painter->setBrush(pageColor);
-    painter->setPen(QPen(frameColor, 2));
-    painter->drawRoundedRect(pageRect, 12, 12);
-
-    // Opcional: sprite del libro arriba a la izquierda
     if (!libroSprite.isNull()) {
-        QRectF imgRect(pageRect.left() + 25.0,
-                       pageRect.top() + 20.0,
-                       100.0, 100.0);
-        painter->drawPixmap(imgRect.toRect(), libroSprite);
+        // 2) Dibujar la carta/libro centrada, usando la imagen como fondo
+
+        // Tamaño destino en pantalla (ajusta si quieres más grande/pequeño)
+        const int anchoDestino = 900;
+        const int altoDestino  = 600;
+
+        QRectF cartaRect(
+            (1600 - anchoDestino) / 2.0,   // centrado en X
+            (900  - altoDestino)  / 2.0,   // centrado en Y
+            anchoDestino,
+            altoDestino
+            );
+
+        // Imagen de la carta como fondo
+        painter->drawPixmap(cartaRect.toRect(), libroSprite);
+
+        // 3) Texto encima de la carta (si quieres seguir usando el texto)
+        painter->setPen(Qt::black);
+        painter->setFont(QFont("Georgia", 15));
+
+        const QString historia =
+            QStringLiteral(
+                "El maletín yace abierto. Un susurro del destino.\n"
+                "Piezas dispersas, algunas vitales, otras... meros fantasmas.\n\n"
+                "Recuerda el orden de la creación:\n"
+                "Primero, la chispa que enciende la voluntad.\n"
+                "Luego, la fuerza que da forma al propósito.\n"
+                "Finalmente, el tic-tac que sentencia el momento.\n\n"
+                "Cada error en el ensamblaje, cada pieza ajena que ose tocar el corazón del artefacto,\n"
+                "te robará un aliento precioso.\n\n"
+                "La mesa es tu lienzo, el maletín tu destino.\n"
+                "Pulsa L para que el secreto vuelva a la sombra."
+                );
+
+        // Margen interior dentro de la carta donde se dibuja el texto
+        QRectF textoRect = cartaRect.adjusted(80.0, 120.0, -80.0, -80.0);
+        painter->drawText(textoRect,
+                          Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap,
+                          historia);
+    } else {
+        // Fallback si la imagen no se cargó: usa el rectángulo anterior
+        QColor coverColor(70, 90, 70);
+        QColor pageColor (230, 225, 210);
+        QColor frameColor(0, 0, 0);
+
+        QRectF libroRect(260.0, 120.0, 1080.0, 640.0);
+
+        painter->setBrush(coverColor);
+        painter->setPen(QPen(frameColor, 5));
+        painter->drawRoundedRect(libroRect, 18, 18);
+
+        QRectF pageRect = libroRect.adjusted(18, 18, -18, -18);
+        painter->setBrush(pageColor);
+        painter->setPen(QPen(frameColor, 2));
+        painter->drawRoundedRect(pageRect, 12, 12);
+
+        painter->setPen(Qt::black);
+        painter->setFont(QFont("Georgia", 26, QFont::Bold));
+        painter->drawText(pageRect.adjusted(0.0, 10.0, 0.0, -540.0),
+                          Qt::AlignTop | Qt::AlignHCenter,
+                          QStringLiteral("NIVEL 2: ENSAMBLAJE DEL ARTEFACTO"));
     }
-
-    // Título
-    painter->setPen(Qt::black);
-    painter->setFont(QFont("Georgia", 26, QFont::Bold));
-    painter->drawText(pageRect.adjusted(0.0, 10.0, 0.0, -540.0),
-                      Qt::AlignTop | Qt::AlignHCenter,
-                      QStringLiteral("NIVEL 2: ENSAMBLAJE DEL ARTEFACTO"));
-
-    // Texto (versión corta)
-    painter->setFont(QFont("Georgia", 15));
-
-    const QString historia =
-        QStringLiteral(
-            "MISIÓN: Ensamblar la bomba en el orden correcto.\n\n"
-            "PIEZAS CORRECTAS (solo 3):\n"
-            "  1. DETONADOR: Dispositivo cuadrado con botón rojo grande.\n"
-            "  2. CARGA EXPLOSIVA: Dinamita roja con correas verdes.\n"
-            "  3. TEMPORIZADOR: Pantalla digital verde con 4 botones.\n\n"
-            "ORDEN: Primero detonador, luego carga, finalmente temporizador.\n\n"
-            "REGLAS:\n"
-            "• Solo pierdes tiempo si una pieza queda dentro del maletín y es incorrecta\n"
-            "  o si una pieza correcta está fuera de orden.\n"
-            "• Cada error: -5 segundos.  Cada acierto en orden: +2 segundos.\n"
-            "• 3 errores consecutivos o tiempo agotado = DERROTA.\n\n"
-            "Puedes mover las piezas por la mesa sin penalización.\n"
-            "Presiona L para cerrar/abrir este libro.");
-
-    painter->drawText(pageRect.adjusted(150.0, 110.0, -40.0, -40.0),
-                      Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap,
-                      historia);
 
     painter->restore();
 }

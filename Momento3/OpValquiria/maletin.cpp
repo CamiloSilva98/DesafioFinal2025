@@ -11,7 +11,7 @@ Maletin::Maletin(const QRectF& rect)
     piezasNecesarias(3),
     piezasColocadas(0)
 {
-    sprite.load(":/img/sprites/maletin.png");
+    sprite.load(":/sprites/sprites/maletin.png");
     if (sprite.isNull()) {
         qDebug() << "ERROR: No se pudo cargar sprite del maletín";
     }

@@ -20,40 +20,40 @@ Pieza::Pieza(TipoPieza t,
     // Cargar sprite según tipo
     switch (tipo) {
     case TipoPieza::DETONADOR:
-        sprite.load(":/img/sprites/detonador.png");
+        sprite.load(":/sprites/sprites/detonador.png");
         break;
     case TipoPieza::CARGA_EXPLOSIVA:
-        sprite.load(":/img/sprites/explosivo.png");
+        sprite.load(":/sprites/sprites/explosivo.png");
         break;
     case TipoPieza::TEMPORIZADOR:
-        sprite.load(":/img/sprites/temporizador.png");
+        sprite.load(":/sprites/sprites/temporizador.png");
         break;
     case TipoPieza::RANDOM1:
-        sprite.load(":/img/sprites/random1.png");
+        sprite.load(":/sprites/sprites/random1.png");
         break;
     case TipoPieza::RANDOM2:
-        sprite.load(":/img/sprites/random2.png");
+        sprite.load(":/sprites/sprites/random2.png");
         break;
     case TipoPieza::RANDOM3:
-        sprite.load(":/img/sprites/random3.png");
+        sprite.load(":/sprites/sprites/random3.png");
         break;
     case TipoPieza::RANDOM4:
-        sprite.load(":/img/sprites/random4.png");
+        sprite.load(":/sprites/sprites/random4.png");
         break;
     case TipoPieza::RANDOM5:
-        sprite.load(":/img/sprites/random5.png");
+        sprite.load(":/sprites/sprites/random5.png");
         break;
     case TipoPieza::RANDOM6:
-        sprite.load(":/img/sprites/random6.png");
+        sprite.load(":/sprites/sprites/random6.png");
         break;
     case TipoPieza::RANDOM7:
-        sprite.load(":/img/sprites/random7.png");
+        sprite.load(":/sprites/sprites/random7.png");
         break;
     case TipoPieza::RANDOM8:
-        sprite.load(":/img/sprites/random8.png");
+        sprite.load(":/sprites/sprites/random8.png");
         break;
     case TipoPieza::RANDOM9:
-        sprite.load(":/img/sprites/random9.png");
+        sprite.load(":/sprites/sprites/random9.png");
         break;
     }
 
