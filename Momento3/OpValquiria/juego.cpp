@@ -2,8 +2,11 @@
 #include "juego.h"
 #include <QPainter>
 #include <QKeyEvent>
+#include <QMouseEvent>
 #include "nivel1.h"
+#include "nivel2.h"
 #include "nivel3.h"
+
 
 Juego::Juego(QWidget* parent)
     : QMainWindow(parent),
@@ -34,12 +37,13 @@ void Juego::iniciar()
     estadoJuego = Estado::JUGANDO;
     puntuacion = 0;
     vidas = 3;
-
     // Iniciar el nivel 1 (lo implementarán después)
     cambiarNivel(3);
+    //cambiarNivel(1); // Iniciar el nivel 1
+    //timer->start(16); // ~60 FPS // Iniciar el loop del juego
 
-    // Iniciar el loop del juego
-    timer->start(16); // ~60 FPS
+    // Iniciar directamente el nivel 2
+    timer->start(16);
 }
 
 void Juego::cambiarNivel(int nivel)
@@ -58,13 +62,20 @@ void Juego::cambiarNivel(int nivel)
             nivelActual->inicializar();
             break;
 
-            //    case 2: nivelActual = new Nivel2Ensamblaje(); break;
+             case 2:
+            nivelActual = new Nivel2();
+            break;;
 
         case 3:
             nivelActual = new Nivel3();
             nivelActual->inicializar();
             break;
     }
+
+    if (nivelActual) {
+        nivelActual->inicializar();
+     }
+
 }
 
 void Juego::actualizarPuntuacion(int puntos)
@@ -101,17 +112,44 @@ void Juego::actualizar()
         // Actualizar el nivel actual
         nivelActual->actualizar(0.016f); // delta time
 
+        // ============================================
+        // VERIFICAR VICTORIA
+        // ============================================
         if (nivelActual->verificarCondicionVictoria())
         {
             qDebug() << "¡NIVEL COMPLETADO!";
             estadoJuego = Estado::VICTORIA;
             timer->stop();
+
+            // Aquí puedes agregar puntuación bonus
             actualizarPuntuacion(1000);
         }
+
+        // ============================================
+        // VERIFICAR DERROTA
+        // ============================================
         if (nivelActual->verificarCondicionDerrota())
         {
             qDebug() << "MISIÓN FALLIDA";
-            terminar();
+            
+            // Diferenciar por nivel
+            int numeroNivel = nivelActual->getNumeroNivel();
+            
+            if (numeroNivel == 1) {
+                // Nivel 1: sistema de vidas (3 detecciones permitidas)
+                // Ya se maneja internamente en Nivel1
+                terminar();  // Game Over
+                
+            } else if (numeroNivel == 2) {
+                // Nivel 2: derrota directa (sin vidas)
+                terminar();  // Game Over inmediato
+                
+            } else if (numeroNivel == 3) {
+                // Nivel 3: depende de la fase
+                // Fase terrestre: 3 choques permitidos
+                // Fase aérea: impacto de misil = game over
+                terminar();
+            }
         }
     }
 
@@ -154,6 +192,38 @@ void Juego::keyReleaseEvent(QKeyEvent* event)
     }
 }
 
+void Juego::mousePressEvent(QMouseEvent* event)
+{
+    if (!nivelActual || estadoJuego != Estado::JUGANDO) return;
+
+    Nivel2* n2 = dynamic_cast<Nivel2*>(nivelActual);
+    if (n2) {
+        n2->manejarMousePress(event->pos());
+    }
+}
+
+void Juego::mouseMoveEvent(QMouseEvent* event)
+{
+    if (!nivelActual || estadoJuego != Estado::JUGANDO) return;
+
+    Nivel2* n2 = dynamic_cast<Nivel2*>(nivelActual);
+    if (n2) {
+        n2->manejarMouseMove(event->pos());
+    }
+}
+
+void Juego::mouseReleaseEvent(QMouseEvent* event)
+{
+    if (!nivelActual || estadoJuego != Estado::JUGANDO) return;
+
+    Nivel2* n2 = dynamic_cast<Nivel2*>(nivelActual);
+    if (n2) {
+        n2->manejarMouseRelease(event->pos());
+    }
+}
+
+
+
 void Juego::paintEvent(QPaintEvent* event)
 {
     QPainter painter(this);
@@ -171,7 +241,11 @@ void Juego::paintEvent(QPaintEvent* event)
         {
             nivelActual->renderizar(&painter);
         }
-        dibujarHUD(painter);
+
+        // Solo mostrar HUD de vidas/puntuación en el Nivel 1
+        if (nivelActual && nivelActual->getNumeroNivel() == 1) {
+            dibujarHUD(painter);
+        }
         break;
     case Estado::PAUSADO:
         if (nivelActual != nullptr)

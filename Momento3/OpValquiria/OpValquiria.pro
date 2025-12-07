@@ -24,11 +24,15 @@ SOURCES += \
     misil.cpp \
     nivel.cpp \
     nivel1.cpp \
+    nivel2.cpp \
     nivel3.cpp \
+    maletin.cpp \
+    pieza.cpp \
     objetointeractivo.cpp \
     obstaculo.cpp \
     planos.cpp \
-    puerta.cpp
+    puerta.cpp\
+    origin/main
 
 HEADERS += \
     agenteinteligente.h \
@@ -44,7 +48,10 @@ HEADERS += \
     misil.h \
     nivel.h \
     nivel1.h \
+    nivel2.h \
     nivel3.h \
+    maletin.h \
+    pieza.h \
     objetointeractivo.h \
     obstaculo.h \
     planos.h \
