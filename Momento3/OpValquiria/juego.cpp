@@ -67,7 +67,9 @@ void Juego::cambiarNivel(int nivel)
 
         case 3:
             nivelActual = new Nivel3();
-            nivelActual->inicializar();
+            break;
+        default:
+            nivelActual = nullptr;
             break;
     }
 }
@@ -183,25 +185,25 @@ void Juego::keyPressEvent(QKeyEvent* event)
             iniciar();
         }
         break;
-        // ===========================
     // N -> siguiente nivel (solo en VICTORIA)
-    // ===========================
     case Qt::Key_N:
         if (estadoJuego == Estado::VICTORIA) {
             if (nivelActual && nivelActual->getNumeroNivel() == 1) {
-                // Pasar de Nivel 1 a Nivel 2
+                // Nivel 1 -> Nivel 2
                 cambiarNivel(2);
                 estadoJuego = Estado::JUGANDO;
                 timer->start(16);
             } else if (nivelActual && nivelActual->getNumeroNivel() == 2) {
-                // Aquí en el futuro: cambiarNivel(3);
-                // Por ahora, volvemos al menú
+                // Nivel 2 -> Nivel 3
+                cambiarNivel(3);
+                estadoJuego = Estado::JUGANDO;
+                timer->start(16);
+            } else if (nivelActual && nivelActual->getNumeroNivel() == 3) {
+                // Nivel 3 -> volver al menú (por ahora fin de juego)
                 estadoJuego = Estado::MENU;
                 timer->stop();
-                if (nivelActual) {
-                    delete nivelActual;
-                    nivelActual = nullptr;
-                }
+                delete nivelActual;
+                nivelActual = nullptr;
             }
             update();
         }
