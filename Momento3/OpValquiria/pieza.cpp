@@ -1,18 +1,65 @@
 #include "pieza.h"
+
 #include <QtMath>
+#include <QDebug>
 
 Pieza::Pieza(TipoPieza t,
              const QPointF& posInit,
              const QPointF& posObj,
-             float r)
+             float r,
+             bool correcta)
     : tipo(t),
     posicion(posInit),
     posicionInicial(posInit),
     posicionObjetivo(posObj),
     radio(r),
     colocada(false),
-    siendoArrastrada(false)
+    siendoArrastrada(false),
+    esCorrecta(correcta)
 {
+    // Cargar sprite según tipo
+    switch (tipo) {
+    case TipoPieza::DETONADOR:
+        sprite.load(":/sprites/sprites/detonador.png");
+        break;
+    case TipoPieza::CARGA_EXPLOSIVA:
+        sprite.load(":/sprites/sprites/explosivo.png");
+        break;
+    case TipoPieza::TEMPORIZADOR:
+        sprite.load(":/sprites/sprites/temporizador.png");
+        break;
+    case TipoPieza::RANDOM1:
+        sprite.load(":/sprites/sprites/random1.png");
+        break;
+    case TipoPieza::RANDOM2:
+        sprite.load(":/sprites/sprites/random2.png");
+        break;
+    case TipoPieza::RANDOM3:
+        sprite.load(":/sprites/sprites/random3.png");
+        break;
+    case TipoPieza::RANDOM4:
+        sprite.load(":/sprites/sprites/random4.png");
+        break;
+    case TipoPieza::RANDOM5:
+        sprite.load(":/sprites/sprites/random5.png");
+        break;
+    case TipoPieza::RANDOM6:
+        sprite.load(":/sprites/sprites/random6.png");
+        break;
+    case TipoPieza::RANDOM7:
+        sprite.load(":/sprites/sprites/random7.png");
+        break;
+    case TipoPieza::RANDOM8:
+        sprite.load(":/sprites/sprites/random8.png");
+        break;
+    case TipoPieza::RANDOM9:
+        sprite.load(":/sprites/sprites/random9.png");
+        break;
+    }
+
+    if (sprite.isNull()) {
+        qDebug() << "ERROR: No se pudo cargar sprite para pieza tipo" << static_cast<int>(tipo);
+    }
 }
 
 void Pieza::iniciarArrastre() {
@@ -28,19 +75,17 @@ void Pieza::moverA(const QPointF& nuevaPos) {
 }
 
 bool Pieza::verificarEncaje() const {
-    // colisión circular entre posicion y posicionObjetivo
-    qreal dx = posicion.x() - posicionObjetivo.x();
-    qreal dy = posicion.y() - posicionObjetivo.y();
-    qreal dist2 = dx*dx + dy*dy;
-    return dist2 < (radio * radio);
+    const qreal dx   = posicion.x() - posicionObjetivo.x();
+    const qreal dy   = posicion.y() - posicionObjetivo.y();
+    const qreal dist = qSqrt(dx * dx + dy * dy);
+    return dist <= radio;
 }
 
 bool Pieza::soltar() {
     siendoArrastrada = false;
     if (verificarEncaje()) {
-        colocada = true;
-        // la fijamos justo en la posición objetivo
-        posicion = posicionObjetivo;
+        colocada  = true;
+        posicion  = posicionObjetivo;
         return true;
     }
     return false;
@@ -48,7 +93,7 @@ bool Pieza::soltar() {
 
 void Pieza::regresarPosicionInicial() {
     if (!colocada) {
-        posicion = posicionInicial;
+        posicion         = posicionInicial;
         siendoArrastrada = false;
     }
 }
@@ -56,26 +101,44 @@ void Pieza::regresarPosicionInicial() {
 void Pieza::dibujar(QPainter* painter) {
     painter->save();
 
-    // Color según tipo
-    QColor color;
-    switch (tipo) {
-    case TipoPieza::DETONADOR:      color = Qt::yellow; break;
-    case TipoPieza::CARGA_EXPLOSIVA: color = Qt::red; break;
-    case TipoPieza::TEMPORIZADOR:   color = Qt::cyan; break;
+    if (!sprite.isNull()) {
+        const int w = 80;  // Tamaño ajustado
+        const int h = 80;
+        const QRectF rect(posicion.x() - w / 2.0,
+                          posicion.y() - h / 2.0,
+                          w, h);
+        painter->drawPixmap(rect.toRect(), sprite);
+    } else {
+        // Fallback si no carga sprite
+        QColor color = Qt::gray;
+
+        if (esCorrecta) {
+            switch (tipo) {
+            case TipoPieza::DETONADOR:
+                color = Qt::yellow;
+                break;
+            case TipoPieza::CARGA_EXPLOSIVA:
+                color = Qt::red;
+                break;
+            case TipoPieza::TEMPORIZADOR:
+                color = Qt::cyan;
+                break;
+            default:
+                break;
+            }
+        }
+
+        painter->setBrush(color);
+        painter->setPen(Qt::black);
+        painter->drawEllipse(posicion, 30.0, 30.0);
     }
-
-    painter->setBrush(color);
-    painter->setPen(Qt::black);
-
-    // La dibujamos como un círculo simple
-    painter->drawEllipse(posicion, 20, 20);
 
     painter->restore();
 }
 
 bool Pieza::contienePunto(const QPointF& p) const {
-    qreal dx = p.x() - posicion.x();
-    qreal dy = p.y() - posicion.y();
-    qreal dist2 = dx*dx + dy*dy;
-    return dist2 < (20.0 * 20.0); // mismo radio gráfico
+    const qreal dx   = p.x() - posicion.x();
+    const qreal dy   = p.y() - posicion.y();
+    const qreal dist = qSqrt(dx * dx + dy * dy);
+    return dist <= 40.0;  // Radio de detección de clic
 }

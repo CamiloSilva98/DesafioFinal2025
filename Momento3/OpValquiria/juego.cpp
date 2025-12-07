@@ -39,6 +39,7 @@ void Juego::iniciar()
     vidas = 3;
     // Iniciar el nivel 1 (lo implementarán después)
     cambiarNivel(1);
+
     //cambiarNivel(1); // Iniciar el nivel 1
     //timer->start(16); // ~60 FPS // Iniciar el loop del juego
 
@@ -162,6 +163,65 @@ void Juego::keyPressEvent(QKeyEvent* event)
         if (estadoJuego == Estado::MENU)
         {
             iniciar();
+        }
+        break;
+        // ===========================
+    // N -> siguiente nivel (solo en VICTORIA)
+    // ===========================
+    case Qt::Key_N:
+        if (estadoJuego == Estado::VICTORIA) {
+            if (nivelActual && nivelActual->getNumeroNivel() == 1) {
+                // Pasar de Nivel 1 a Nivel 2
+                cambiarNivel(2);
+                estadoJuego = Estado::JUGANDO;
+                timer->start(16);
+            } else if (nivelActual && nivelActual->getNumeroNivel() == 2) {
+                // Aquí en el futuro: cambiarNivel(3);
+                // Por ahora, volvemos al menú
+                estadoJuego = Estado::MENU;
+                timer->stop();
+                if (nivelActual) {
+                    delete nivelActual;
+                    nivelActual = nullptr;
+                }
+            }
+            update();
+        }
+        break;
+    // R -> reiniciar nivel actual (solo en DERROTA)
+    case Qt::Key_R:
+        if (estadoJuego == Estado::DERROTA) {
+            if (nivelActual) {
+                int n = nivelActual->getNumeroNivel();
+                cambiarNivel(n);          // recarga el mismo nivel
+                estadoJuego = Estado::JUGANDO;
+                timer->start(16);
+                update();
+            }
+        }
+        break;
+
+    // M -> volver al menú desde VICTORIA o DERROTA=
+    case Qt::Key_M:
+        if (estadoJuego == Estado::VICTORIA || estadoJuego == Estado::DERROTA) {
+            estadoJuego = Estado::MENU;
+            timer->stop();
+            if (nivelActual) {
+                delete nivelActual;
+                nivelActual = nullptr;
+            }
+            update();
+        }
+        break;
+
+    // L -> libro en Nivel 2 (solo jugando)
+    case Qt::Key_L:
+        if (nivelActual && estadoJuego == Estado::JUGANDO)
+        {
+            Nivel2* nivel2 = dynamic_cast<Nivel2*>(nivelActual);
+            if (nivel2) {
+                nivel2->alternarLibro();
+            }
         }
         break;
     default:
@@ -296,34 +356,73 @@ void Juego::dibujarVictoria(QPainter& painter)
     // Fondo oscuro semi-transparente
     painter.fillRect(rect(), QColor(0, 0, 0, 200));
 
-    // Título de victoria
-    painter.setPen(Qt::green);
     painter.setFont(QFont("Arial", 48, QFont::Bold));
-    painter.drawText(rect().adjusted(0, -350, 0, 0), Qt::AlignCenter, "¡MISIÓN COMPLETADA!");
+    painter.setPen(Qt::green);
+    painter.drawText(rect().adjusted(0, -320, 0, 0),
+                     Qt::AlignCenter,
+                     "¡MISIÓN COMPLETADA!");
 
-    // Detalles
     painter.setPen(Qt::white);
     painter.setFont(QFont("Arial", 20));
 
-    QString detalles = QString(
-                           "Nivel 1: La Guarida del Lobo\n\n"
-                           "Puntuación: %1\n"
-                           "Vidas restantes: %2\n\n"
-                           "¡Has obtenido los planos y escapado con éxito!"
-                           ).arg(puntuacion).arg(vidas);
+    QString detalles;
+
+    if (nivelActual && nivelActual->getNumeroNivel() == 1) {
+        detalles = QString(
+                       "Nivel 1: La Guarida del Lobo\n\n"
+                       "Puntuación: %1\n"
+                       "Vidas restantes: %2\n\n"
+                       "Has conseguido los planos y escapado con vida.\n"
+                       "El siguiente objetivo te espera en el Nivel 2."
+                       ).arg(puntuacion).arg(vidas);
+    }
+    else if (nivelActual && nivelActual->getNumeroNivel() == 2) {
+        detalles = QString(
+                       "Nivel 2: Ensamblaje del Artefacto\n\n"
+                       "Puntuación: %1\n\n"
+                       "Has ensamblado el dispositivo a la perfección.\n"
+                       "El camino se abre hacia el Nivel 3."
+                       ).arg(puntuacion);
+    }
+    else {
+        detalles = QString(
+                       "Puntuación: %1\n\n"
+                       "Has completado la misión actual.\n"
+                       "Prepárate para el siguiente desafío."
+                       ).arg(puntuacion);
+    }
 
     painter.drawText(rect(), Qt::AlignCenter, detalles);
 
-    // Instrucciones
+    // Instrucciones al jugador
     painter.setFont(QFont("Arial", 14));
-    painter.drawText(rect().adjusted(0, 250, 0, 0), Qt::AlignCenter,
-                     "Presiona ESPACIO para continuar al siguiente nivel\n"
-                     "Presiona ESC para volver al menú");
+    painter.drawText(rect().adjusted(0, 260, 0, 0),
+                     Qt::AlignCenter,
+                     "Pulsa N para continuar al siguiente nivel\n"
+                     "Pulsa M para volver al menú principal");
 }
 
 void Juego::dibujarDerrota(QPainter& painter)
 {
+    // Fondo oscuro semi-transparente
+    painter.fillRect(rect(), QColor(0, 0, 0, 200));
+
     painter.setPen(Qt::red);
-    painter.setFont(QFont("Arial", 35, QFont::Bold));
-    painter.drawText(rect(), Qt::AlignCenter, "MISIÓN FALLIDA");
+    painter.setFont(QFont("Arial", 48, QFont::Bold));
+    painter.drawText(rect().adjusted(0, -100, 0, 0),
+                     Qt::AlignCenter,
+                     "MISIÓN FALLIDA");
+
+    painter.setPen(Qt::white);
+    painter.setFont(QFont("Arial", 18));
+    painter.drawText(rect().adjusted(0, 20, 0, 0),
+                     Qt::AlignCenter,
+                     "Has perdido esta oportunidad.\n"
+                     "Puede haber sido por el tiempo o por demasiados errores.");
+
+    painter.setFont(QFont("Arial", 16));
+    painter.drawText(rect().adjusted(0, 120, 0, 0),
+                     Qt::AlignCenter,
+                     "Presiona R para reiniciar este nivel\n"
+                     "Pulsa M para volver al menú principal");
 }

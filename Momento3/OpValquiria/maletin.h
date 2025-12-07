@@ -3,15 +3,18 @@
 
 #include <QRectF>
 #include <QPainter>
+#include <QPixmap>
 
 class Maletin {
 public:
-    QRectF area;
-    bool cerrado;
-    int piezasNecesarias;
-    int piezasColocadas;
+    QRectF  area;
+    bool    cerrado;
+    int     piezasNecesarias;
+    int     piezasColocadas;
 
-    Maletin(const QRectF& rect);
+    QPixmap sprite;
+
+    explicit Maletin(const QRectF& rect);
 
     void agregarPieza();
     bool estaCompleto() const;
@@ -19,4 +22,4 @@ public:
     void dibujar(QPainter* painter);
 };
 
-#endif
+#endif // MALETIN_H
