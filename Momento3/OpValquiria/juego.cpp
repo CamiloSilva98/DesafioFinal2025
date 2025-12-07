@@ -5,6 +5,8 @@
 #include <QMouseEvent>
 #include "nivel1.h"
 #include "nivel2.h"
+#include "nivel3.h"
+
 
 Juego::Juego(QWidget* parent)
     : QMainWindow(parent),
@@ -35,20 +37,17 @@ void Juego::iniciar()
     estadoJuego = Estado::JUGANDO;
     puntuacion = 0;
     vidas = 3;
-
-
+    // Iniciar el nivel 1 (lo implementarán después)
+    cambiarNivel(3);
     //cambiarNivel(1); // Iniciar el nivel 1
     //timer->start(16); // ~60 FPS // Iniciar el loop del juego
 
     // Iniciar directamente el nivel 2
-    cambiarNivel(2);
     timer->start(16);
 }
 
 void Juego::cambiarNivel(int nivel)
 {
-    // Por ahora solo un placeholder
-    // Después crearán los niveles específicos
     if (nivelActual != nullptr)
     {
         delete nivelActual;
@@ -58,16 +57,19 @@ void Juego::cambiarNivel(int nivel)
     // TODO: crear niveles según el número
     switch(nivel)
     {
-        //case 1:
-        //nivelActual = new Nivel1();
-        //nivelActual->inicializar();
-        //break;
-
-        case 2:
-            nivelActual = new Nivel2();
+        case 1:
+            nivelActual = new Nivel1();
+            nivelActual->inicializar();
             break;
-    //     case 2: nivelActual = new Nivel2Ensamblaje(); break;
-    //     case 3: nivelActual = new Nivel3Escape(); break;
+
+             case 2:
+            nivelActual = new Nivel2();
+            break;;
+
+        case 3:
+            nivelActual = new Nivel3();
+            nivelActual->inicializar();
+            break;
     }
 
     if (nivelActual) {
@@ -103,29 +105,16 @@ void Juego::terminar()
 
 void Juego::actualizar()
 {
+    // Este método se llama 60 veces por segundo
+
     if (estadoJuego == Estado::JUGANDO && nivelActual != nullptr)
     {
+        // Actualizar el nivel actual
         nivelActual->actualizar(0.016f); // delta time
 
-<<<<<<< HEAD
-        if (nivelActual->verificarCondicionVictoria()) {
-            estadoJuego = Estado::VICTORIA;
-            timer->stop();
-        } else if (nivelActual->verificarCondicionDerrota()) {
-            // Diferenciar por nivel
-            if (nivelActual->getNumeroNivel() == 1) {
-                // Nivel 1: usar sistema de vidas
-                vidas--;
-                if (vidas > 0) {
-                    cambiarNivel(1);  // reiniciar nivel 1
-                } else {
-                    terminar();  // Game Over
-                }
-            } else if (nivelActual->getNumeroNivel() == 2) {
-                // Nivel 2: derrota directa (sin vidas)
-                terminar();  // Game Over inmediato
-            }
-=======
+        // ============================================
+        // VERIFICAR VICTORIA
+        // ============================================
         if (nivelActual->verificarCondicionVictoria())
         {
             qDebug() << "¡NIVEL COMPLETADO!";
@@ -136,16 +125,35 @@ void Juego::actualizar()
             actualizarPuntuacion(1000);
         }
 
-        // ⭐ Verificar condiciones de derrota
+        // ============================================
+        // VERIFICAR DERROTA
+        // ============================================
         if (nivelActual->verificarCondicionDerrota())
         {
             qDebug() << "MISIÓN FALLIDA";
-            terminar();
->>>>>>> origin/main
+            
+            // Diferenciar por nivel
+            int numeroNivel = nivelActual->getNumeroNivel();
+            
+            if (numeroNivel == 1) {
+                // Nivel 1: sistema de vidas (3 detecciones permitidas)
+                // Ya se maneja internamente en Nivel1
+                terminar();  // Game Over
+                
+            } else if (numeroNivel == 2) {
+                // Nivel 2: derrota directa (sin vidas)
+                terminar();  // Game Over inmediato
+                
+            } else if (numeroNivel == 3) {
+                // Nivel 3: depende de la fase
+                // Fase terrestre: 3 choques permitidos
+                // Fase aérea: impacto de misil = game over
+                terminar();
+            }
         }
     }
 
-    update(); // Redibuja
+    update(); // Llama a paintEvent()
 }
 
 void Juego::keyPressEvent(QKeyEvent* event)
@@ -162,7 +170,6 @@ void Juego::keyPressEvent(QKeyEvent* event)
         }
         break;
     default:
-        // ⭐ PASAR TODAS LAS TECLAS AL NIVEL
         if (nivelActual && estadoJuego == Estado::JUGANDO)
         {
             Nivel1* nivel1 = dynamic_cast<Nivel1*>(nivelActual);
