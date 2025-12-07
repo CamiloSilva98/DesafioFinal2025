@@ -38,7 +38,8 @@ void Juego::iniciar()
     puntuacion = 0;
     vidas = 3;
     // Iniciar el nivel 1 (lo implementarán después)
-    cambiarNivel(2);
+    cambiarNivel(1);
+
     //cambiarNivel(1); // Iniciar el nivel 1
     //timer->start(16); // ~60 FPS // Iniciar el loop del juego
 
@@ -62,7 +63,7 @@ void Juego::cambiarNivel(int nivel)
             nivelActual->inicializar();
             break;
 
-             case 2:
+        case 2:
             nivelActual = new Nivel2();
             break;;
 
@@ -71,11 +72,6 @@ void Juego::cambiarNivel(int nivel)
             nivelActual->inicializar();
             break;
     }
-
-    if (nivelActual) {
-        nivelActual->inicializar();
-     }
-
 }
 
 void Juego::actualizarPuntuacion(int puntos)
