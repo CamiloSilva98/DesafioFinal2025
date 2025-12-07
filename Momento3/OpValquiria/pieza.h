@@ -4,11 +4,21 @@
 #include <QPointF>
 #include <QRectF>
 #include <QPainter>
+#include <QPixmap>
 
 enum class TipoPieza {
     DETONADOR,
     CARGA_EXPLOSIVA,
-    TEMPORIZADOR
+    TEMPORIZADOR,
+    RANDOM1,
+    RANDOM2,
+    RANDOM3,
+    RANDOM4,
+    RANDOM5,
+    RANDOM6,
+    RANDOM7,
+    RANDOM8,
+    RANDOM9
 };
 
 class Pieza {
@@ -17,18 +27,22 @@ public:
     QPointF posicion;
     QPointF posicionInicial;
     QPointF posicionObjetivo;
-    float radio;
-    bool colocada;
-    bool siendoArrastrada;
+    float   radio;
+    bool    colocada;
+    bool    siendoArrastrada;
+    bool    esCorrecta;      // true si es detonador, carga o temporizador
+
+    QPixmap sprite;
 
     Pieza(TipoPieza t,
           const QPointF& posInit,
           const QPointF& posObj,
-          float r);
+          float r,
+          bool correcta);
 
     void iniciarArrastre();
     void moverA(const QPointF& nuevaPos);
-    bool soltar();                 // true si encaja
+    bool soltar();
     bool verificarEncaje() const;
     void regresarPosicionInicial();
 
@@ -36,4 +50,4 @@ public:
     bool contienePunto(const QPointF& p) const;
 };
 
-#endif
+#endif // PIEZA_H
