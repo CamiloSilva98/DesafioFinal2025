@@ -63,10 +63,12 @@ void Juego::cambiarNivel(int nivel)
 
         case 2:
             nivelActual = new Nivel2();
+            nivelActual->inicializar();
             break;;
 
         case 3:
             nivelActual = new Nivel3();
+            nivelActual->inicializar();
             break;
         default:
             nivelActual = nullptr;
